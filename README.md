@@ -16,6 +16,32 @@ The repository is organized as follows:
 - **`docs/`**: Documentation and course materials.
     - `ASSIGNMENT_GUIDE.md`: Detailed guide on using the scripts.
     - `course_materials/`: PDFs, PPTs, and other course-related documents.
+- **`Assignments/`**: Course assignments with MATLAB/Simulink simulations and reports.
+
+### Assignments
+
+#### Assignment 1: Synchronous Generators
+
+Covers synchronous machine control, parallel operation of two generators, and grid synchronization using MATLAB Simulink.
+
+```
+Assignments/Assignment_1_Synchronous_Generators/
+├── MATLAB/
+│   ├── Exercise1_Setup.m          — Single generator load variation (Task 1 & 2)
+│   ├── Exercise2_TwoGenerators.m  — Parallel generators (Task 3 & 4)
+│   ├── Exercise3_InfiniteBus.m    — Infinite bus synchronization (Task 5 & 6)
+│   └── plots/                     — Generated plots (created on run)
+├── Report/
+│   └── main.tex                   — Complete LaTeX report
+├── Instructions_Simulink.md
+└── Report_Template.md
+```
+
+**Prerequisites:** MATLAB with Simscape Electrical toolbox.
+
+**Usage:**
+1. Run each MATLAB script in order — plots are saved to `MATLAB/plots/`
+2. Compile `Report/main.tex` with `pdflatex` to generate the final PDF
 
 ### Getting Started
 
