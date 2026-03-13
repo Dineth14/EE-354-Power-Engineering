@@ -1,4 +1,4 @@
-## EE-354 Power Engineering Load Flow Analysis
+## EE-354 Power Engineering 
 
 This repository contains resources and code related to load flow analysis in power engineering, specifically for the EE-354 course. Load flow analysis is essential for understanding the steady-state operation of electrical power systems.
 

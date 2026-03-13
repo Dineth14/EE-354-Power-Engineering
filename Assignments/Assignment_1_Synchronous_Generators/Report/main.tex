@@ -1,0 +1,668 @@
+\documentclass[12pt, a4paper]{article}
+
+% ===== Packages =====
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{tikz}
+
+% ===== Code listing style =====
+\lstset{
+    language=Matlab,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red!70!black},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    breaklines=true,
+    captionpos=b,
+    tabsize=4
+}
+
+% ===== Header/Footer =====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{EE354 -- Power Engineering}
+\fancyhead[R]{Assignment 1: Synchronous Generators}
+\fancyfoot[C]{\thepage}
+
+% ===== Plot path =====
+\graphicspath{{../MATLAB/plots/}}
+
+% ===== Document =====
+\begin{document}
+
+% ===== Title Page =====
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\LARGE\textbf{University of Moratuwa}}\\[0.5cm]
+    {\large Department of Electrical Engineering}\\[2cm]
+    
+    {\Huge\textbf{EE354 -- Power Engineering}}\\[1cm]
+    {\LARGE\textbf{Assignment 1}}\\[0.5cm]
+    {\Large Synchronous Generators:\\
+    Control, Parallel Operation, and Grid Synchronization}\\[3cm]
+    
+    \begin{tabular}{ll}
+        \textbf{Name:}          & [Your Name] \\
+        \textbf{Index No:}      & [Your Index Number] \\
+        \textbf{Group:}         & [Your Group] \\
+        \textbf{Date:}          & \today \\
+    \end{tabular}
+    
+    \vfill
+    {\small Semester 5 -- 2025/2026}
+\end{titlepage}
+
+% ===== Table of Contents =====
+\tableofcontents
+\newpage
+
+% ========================================================================
+%                           EXERCISE 1
+% ========================================================================
+\section{Exercise 1: Synchronous Machine Control}
+
+This exercise examines the behavior of a single synchronous machine connected to a load, based on the MATLAB Simulink example \texttt{SMControlExample}. The simulation model was copied locally and executed without modifications.
+
+% ----- Task 1 -----
+\subsection{Task 1: Component Analysis}
+
+\subsubsection{Synchronous Machine}
+
+The synchronous machine is the core electromechanical energy conversion device. In the Simulink model, it is represented by a detailed d-q axis model that captures both the electrical dynamics (stator and rotor windings) and the mechanical dynamics (rotor inertia).
+
+\textbf{Key Parameters:}
+\begin{itemize}[noitemsep]
+    \item Nominal Power: 100~MVA at 13.8~kV
+    \item Nominal Frequency: 50~Hz
+    \item Synchronous reactances: $X_d = 1.305$~pu, $X_q = 0.474$~pu
+    \item Transient reactances: $X_d' = 0.296$~pu, $X_d'' = 0.252$~pu
+\end{itemize}
+
+\textbf{Governing Equations:}
+
+The internal generated voltage:
+\begin{equation}
+    E_a = K \cdot \phi \cdot \omega = K \cdot I_f \cdot \omega
+    \label{eq:emf}
+\end{equation}
+
+The terminal voltage in phasor form:
+\begin{equation}
+    \vec{V}_t = \vec{E}_a - j X_d \vec{I}_d - j X_q \vec{I}_q - R_s \vec{I}_a
+    \label{eq:terminal_voltage}
+\end{equation}
+
+The power-angle relationship:
+\begin{equation}
+    P = \frac{E_a V_t}{X_d} \sin\delta + \frac{V_t^2 (X_d - X_q)}{2 X_d X_q} \sin 2\delta
+    \label{eq:power_angle}
+\end{equation}
+
+\subsubsection{Automatic Voltage Regulator (AVR) and Exciter}
+
+The AVR maintains the terminal voltage $V_t$ at a desired reference value $V_{\text{ref}}$. It continuously senses $V_t$, compares it with $V_{\text{ref}}$, and adjusts the field voltage $E_{fd}$ through the exciter accordingly.
+
+\textbf{Control Loop:}
+\begin{equation}
+    E_{fd} = K_a \cdot \frac{1}{1 + s T_a} \cdot (V_{\text{ref}} - V_t)
+    \label{eq:avr}
+\end{equation}
+
+\textbf{Relationship:}
+\begin{equation}
+    \Delta V_t \xrightarrow{\text{AVR}} \Delta E_{fd} \xrightarrow{\text{Exciter}} \Delta I_f \xrightarrow{} \Delta E_a \xrightarrow{} \Delta Q
+    \label{eq:avr_chain}
+\end{equation}
+
+The AVR primarily controls \textbf{reactive power} ($Q$) by adjusting the field excitation. Increasing $E_{fd}$ leads to a larger internal EMF $E_a$, which in turn increases $Q$ output for a given load condition.
+
+\subsubsection{Governor and Prime Mover}
+
+The governor controls the rotor speed (and hence frequency) by adjusting the mechanical power input from the prime mover (turbine).
+
+\textbf{Droop Characteristic:}
+\begin{equation}
+    P_m = P_{\text{ref}} - \frac{1}{R} (\omega - \omega_{\text{ref}})
+    \label{eq:droop}
+\end{equation}
+
+where $R$ is the speed droop coefficient (typically 4--5\%). The transfer function of the governor:
+\begin{equation}
+    G_{\text{gov}}(s) = \frac{1}{1 + s T_g} \cdot \frac{1}{R}
+    \label{eq:governor_tf}
+\end{equation}
+
+\textbf{Relationship:}
+\begin{equation}
+    \Delta \omega \xrightarrow{\text{Governor}} \Delta P_m \xrightarrow{\text{Prime Mover}} \Delta T_m \xrightarrow{} \Delta P
+    \label{eq:gov_chain}
+\end{equation}
+
+The governor primarily controls \textbf{active power} ($P$) and frequency.
+
+\subsubsection{Machine Inertia}
+
+The inertia of the rotating mass (rotor + turbine) determines the machine's resistance to speed changes during transients. It is characterized by the inertia constant $H$:
+\begin{equation}
+    H = \frac{\frac{1}{2} J \omega_0^2}{S_{\text{base}}} \quad \text{(seconds)}
+    \label{eq:inertia}
+\end{equation}
+
+The \textbf{swing equation} governs rotor dynamics:
+\begin{equation}
+    2H \frac{d\omega}{dt} = P_m - P_e - D(\omega - \omega_0)
+    \label{eq:swing}
+\end{equation}
+
+A higher $H$ value means:
+\begin{itemize}[noitemsep]
+    \item Slower frequency deviations during disturbances
+    \item Greater kinetic energy reserve
+    \item More robust transient stability
+\end{itemize}
+
+% ----- Task 2 -----
+\subsection{Task 2: Load Variation Analysis}
+
+The simulation was executed with pre-configured load steps. The following plots show the synchronous machine's response.
+
+\subsubsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Ex1_Task2_LoadVariation.png}
+    \caption{Synchronous machine response to load variation: Speed, Voltage, Active Power, Reactive Power, and Frequency.}
+    \label{fig:ex1_combined}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex1_Speed.png}
+        \caption{Rotor Speed}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex1_Voltage.png}
+        \caption{Terminal Voltage}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex1_ActivePower.png}
+        \caption{Active Power}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex1_ReactivePower.png}
+        \caption{Reactive Power}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex1_Frequency.png}
+        \caption{Frequency}
+    \end{subfigure}
+    \caption{Individual signal plots for Task~2.}
+    \label{fig:ex1_individual}
+\end{figure}
+
+\subsubsection{Active Power and Frequency Relationship}
+
+From the swing equation~\eqref{eq:swing}, when the active power demand ($P_e$) increases:
+\begin{equation}
+    P_m - P_e < 0 \implies \frac{d\omega}{dt} < 0 \implies \text{Speed (and frequency) decreases}
+\end{equation}
+
+The governor responds to the speed drop by increasing mechanical power $P_m$ via the droop characteristic~\eqref{eq:droop}. The system stabilizes at a new operating point where:
+\begin{equation}
+    f_{\text{new}} = f_0 - R \cdot \Delta P \cdot f_0
+    \label{eq:freq_drop}
+\end{equation}
+
+\textbf{Key observations from the plots:}
+\begin{itemize}
+    \item When active load increases (e.g., at $t = 3$~s), the frequency dips momentarily before the governor stabilizes it at a slightly lower steady-state value.
+    \item The speed droop ensures proportional load sharing -- a 5\% droop means a 5\% frequency change for full load change.
+    \item Higher inertia ($H$) results in smaller initial frequency dips (Rate of Change of Frequency, $\text{RoCoF} = \frac{\Delta P}{2H}$).
+\end{itemize}
+
+\subsubsection{Reactive Power and Voltage Relationship}
+
+Terminal voltage and reactive power are related through the synchronous machine equivalent circuit:
+\begin{equation}
+    V_t = E_a - I_a (R_s + j X_s) \approx E_a - j X_s I_a
+    \label{eq:vt_drop}
+\end{equation}
+
+When reactive load ($Q$) increases:
+\begin{equation}
+    \uparrow Q \implies \uparrow I_a \sin\phi \implies \uparrow \text{voltage drop across } X_s \implies \downarrow V_t
+\end{equation}
+
+The AVR responds by increasing the field voltage:
+\begin{equation}
+    \Delta V_t < 0 \xrightarrow{\text{AVR}} \uparrow E_{fd} \xrightarrow{} \uparrow E_a \xrightarrow{} V_t \text{ restored}
+\end{equation}
+
+\textbf{Key observations:}
+\begin{itemize}
+    \item Terminal voltage dips when reactive load increases, but the AVR quickly restores it to near the reference value.
+    \item The AVR response time ($T_a$) determines how quickly voltage is restored.
+    \item Over-excitation ($E_a > V_t$) causes the machine to supply reactive power (lagging), while under-excitation causes it to absorb reactive power (leading).
+\end{itemize}
+
+\newpage
+
+% ========================================================================
+%                           EXERCISE 2
+% ========================================================================
+\section{Exercise 2: Parallel Operation of Two Synchronous Generators}
+
+In this exercise, the model is modified to include two identical synchronous generators. Gen~A is connected to a fixed load, while Gen~B is an oncoming generator that is paralleled with Gen~A through a circuit breaker that closes at $t = 5$~s.
+
+% ----- Task 3 -----
+\subsection{Task 3: Synchronization at Lower Frequency ($f_B < f_A$)}
+
+Gen~B is set to operate at a slightly \textbf{lower} speed reference ($\omega_B = 0.998$~pu) compared to Gen~A ($\omega_A = 1.0$~pu). The breaker closes at $t = 5$~s.
+
+\subsubsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Ex2_Task3_Combined.png}
+    \caption{Task~3: Parallel operation with Gen~B at lower frequency. Active Power, Reactive Power, Voltage, and Frequency for both generators.}
+    \label{fig:ex2_task3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task3_ActivePower.png}
+        \caption{Active Power}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task3_ReactivePower.png}
+        \caption{Reactive Power}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task3_Voltage.png}
+        \caption{Terminal Voltage}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task3_Frequency.png}
+        \caption{Frequency}
+    \end{subfigure}
+    \caption{Individual plots for Task~3.}
+    \label{fig:ex2_task3_individual}
+\end{figure}
+
+\subsubsection{Discussion}
+
+When Gen~B is connected with a lower frequency reference:
+
+\textbf{Active Power:}
+Since $f_B < f_A$, Gen~B's rotor angle $\delta_B$ tends to lag behind that of Gen~A. The power-angle equation~\eqref{eq:power_angle} dictates:
+\begin{equation}
+    P_B = \frac{E_B V_{\text{bus}}}{X_d} \sin\delta_B
+\end{equation}
+Since $\delta_B$ tends negative, $P_B < 0$, meaning Gen~B \textbf{absorbs} active power (acts as a motor). This is a dangerous condition -- reverse power protection would typically trip the generator.
+
+\textbf{Frequency:}
+The system frequency settles at an intermediate value between the two speed references:
+\begin{equation}
+    f_{\text{sys}} = \frac{f_A / R_A + f_B / R_B}{1/R_A + 1/R_B}
+    \label{eq:freq_sharing}
+\end{equation}
+
+For identical machines with identical droop: $f_{\text{sys}} \approx \frac{f_A + f_B}{2}$.
+
+\textbf{Reactive Power:}
+After paralleling, both machines share the reactive load based on their AVR setpoints. Since the machines are identical with the same $V_{\text{ref}}$, reactive power is shared approximately equally.
+
+\textbf{Voltage:}
+Terminal voltage remains relatively stable due to AVR action on both machines. Minor transient deviations occur at the instant of breaker closing.
+
+% ----- Task 4 -----
+\subsection{Task 4: Synchronization at Higher Frequency ($f_B > f_A$)}
+
+Gen~B is now set to a slightly \textbf{higher} speed reference ($\omega_B = 1.002$~pu) compared to Gen~A ($\omega_A = 1.0$~pu).
+
+\subsubsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Ex2_Task4_Combined.png}
+    \caption{Task~4: Parallel operation with Gen~B at higher frequency.}
+    \label{fig:ex2_task4}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task4_ActivePower.png}
+        \caption{Active Power}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task4_ReactivePower.png}
+        \caption{Reactive Power}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task4_Voltage.png}
+        \caption{Terminal Voltage}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex2_Task4_Frequency.png}
+        \caption{Frequency}
+    \end{subfigure}
+    \caption{Individual plots for Task~4.}
+    \label{fig:ex2_task4_individual}
+\end{figure}
+
+\subsubsection{Discussion}
+
+When Gen~B is connected with a higher frequency reference:
+
+\textbf{Active Power:}
+Since $f_B > f_A$, Gen~B's rotor angle leads Gen~A. This means $\delta_B > 0$ and:
+\begin{equation}
+    P_B > 0 \implies \text{Gen~B immediately starts supplying active power}
+\end{equation}
+This is the \textbf{preferred synchronization method} because the oncoming generator immediately picks up load and does not motor.
+
+\textbf{Load Sharing:}
+The load redistribution follows the droop characteristics of both generators:
+\begin{align}
+    P_A &= \frac{1}{R_A}(\omega_{\text{ref},A} - \omega_{\text{sys}}) \\
+    P_B &= \frac{1}{R_B}(\omega_{\text{ref},B} - \omega_{\text{sys}})
+\end{align}
+
+Since $\omega_{\text{ref},B} > \omega_{\text{ref},A}$, Gen~B naturally picks up more load.
+
+\textbf{Frequency:}
+The system frequency increases slightly from the single-generator case, settling at the weighted average of both speed references~\eqref{eq:freq_sharing}.
+
+\textbf{Comparison with Task~3:}
+\begin{table}[H]
+    \centering
+    \caption{Comparison of Task~3 and Task~4}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Parameter} & \textbf{Task 3 ($f_B < f_A$)} & \textbf{Task 4 ($f_B > f_A$)} \\
+        \midrule
+        Gen B Active Power  & Negative (motoring)  & Positive (generating) \\
+        Gen A Active Power  & Increased            & Decreased (shared load) \\
+        System Frequency    & Slightly lower       & Slightly higher \\
+        Risk                & Reverse power        & None (preferred method) \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:task34_comparison}
+\end{table}
+
+\newpage
+
+% ========================================================================
+%                           EXERCISE 3
+% ========================================================================
+\section{Exercise 3: Parallel Operation with Infinite Bus}
+
+In this exercise, Gen~A is replaced by an \textbf{infinite bus} (external grid), which has effectively infinite inertia. This means the grid voltage $V_{\text{grid}}$ and frequency $f_{\text{grid}}$ remain \textbf{constant} regardless of Gen~B's actions. The fixed load remains connected to the grid bus.
+
+\subsection{Infinite Bus Characteristics}
+
+An infinite bus is defined by:
+\begin{itemize}[noitemsep]
+    \item $V_{\text{bus}} = V_{\text{rated}} = \text{constant}$ (infinite short-circuit capacity)
+    \item $f_{\text{bus}} = f_{\text{rated}} = \text{constant}$ (infinite inertia, $H \to \infty$)
+    \item Internal impedance $\approx 0$ (very stiff source)
+\end{itemize}
+
+The key difference from Exercise~2: a single small generator \textbf{cannot influence} the grid's voltage or frequency. All adjustments must come from the generator side.
+
+% ----- Task 5 -----
+\subsection{Task 5: Synchronization Below Grid Frequency ($f_B < f_{\text{grid}}$)}
+
+Gen~B speed reference is set to $\omega_B = 0.998$~pu while the grid operates at $\omega_{\text{grid}} = 1.0$~pu.
+
+\subsubsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Ex3_Task5_Combined.png}
+    \caption{Task~5: Gen~B paralleled with infinite bus at lower frequency.}
+    \label{fig:ex3_task5}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task5_ActivePower.png}
+        \caption{Active Power}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task5_ReactivePower.png}
+        \caption{Reactive Power}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task5_Voltage.png}
+        \caption{Terminal Voltage}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task5_Frequency.png}
+        \caption{Frequency}
+    \end{subfigure}
+    \caption{Individual plots for Task~5.}
+    \label{fig:ex3_task5_individual}
+\end{figure}
+
+\subsubsection{Discussion}
+
+\textbf{Active Power:}
+With $f_B < f_{\text{grid}}$, Gen~B's rotor angle lags behind the grid reference. The power-angle equation gives:
+\begin{equation}
+    P_B = \frac{E_B V_{\text{grid}}}{X_d} \sin\delta_B < 0 \quad (\delta_B < 0)
+\end{equation}
+Gen~B acts as a \textbf{synchronous motor}, absorbing active power from the grid. The grid easily supplies this power due to its infinite capacity.
+
+\textbf{Frequency:}
+Unlike Exercise~2, the grid frequency remains \textbf{exactly constant} at 50~Hz. The infinite bus forces Gen~B to operate at grid frequency once it is pulled into synchronism. Gen~B's speed is ``pulled up'' to the grid frequency by the electromagnetic coupling:
+\begin{equation}
+    P_{\text{synch}} = \frac{E_B V_{\text{grid}}}{X_d} \sin\delta \quad \text{(restoring torque)}
+\end{equation}
+
+\textbf{Reactive Power:}
+Gen~B's reactive power depends on the relative magnitudes of $E_B$ and $V_{\text{grid}}$:
+\begin{equation}
+    Q_B = \frac{E_B V_{\text{grid}} \cos\delta - V_{\text{grid}}^2}{X_d}
+    \label{eq:reactive_grid}
+\end{equation}
+If $E_B > V_{\text{grid}}$, Gen~B supplies $Q$ (overexcited); if $E_B < V_{\text{grid}}$, it absorbs $Q$ (underexcited).
+
+\textbf{Voltage:}
+The bus voltage is fixed by the grid. Gen~B's terminal voltage is essentially the grid voltage, with only minor deviations due to the line impedance.
+
+\subsubsection{Comparison with Task~3}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison: Two-Generator (Task~3) vs.\ Infinite Bus (Task~5)}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Parameter} & \textbf{Task 3 (Two Gen)} & \textbf{Task 5 (Infinite Bus)} \\
+        \midrule
+        Grid/Gen A frequency & Changes (finite $H$) & Constant (infinite $H$) \\
+        System frequency     & Settles at intermediate & Stays at 50~Hz \\
+        Gen B behavior       & Motoring, but affects $f_A$ & Motoring, no grid effect \\
+        Voltage stability    & Minor deviations both sides & Grid voltage unaffected \\
+        Recovery time        & Longer (both adjust) & Faster (only Gen B adjusts) \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:task35_comparison}
+\end{table}
+
+% ----- Task 6 -----
+\subsection{Task 6: Synchronization Above Grid Frequency ($f_B > f_{\text{grid}}$)}
+
+Gen~B speed reference is set to $\omega_B = 1.002$~pu while the grid operates at $\omega_{\text{grid}} = 1.0$~pu.
+
+\subsubsection{Simulation Results}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Ex3_Task6_Combined.png}
+    \caption{Task~6: Gen~B paralleled with infinite bus at higher frequency.}
+    \label{fig:ex3_task6}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task6_ActivePower.png}
+        \caption{Active Power}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task6_ReactivePower.png}
+        \caption{Reactive Power}
+    \end{subfigure}
+    \\[0.5cm]
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task6_Voltage.png}
+        \caption{Terminal Voltage}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{Ex3_Task6_Frequency.png}
+        \caption{Frequency}
+    \end{subfigure}
+    \caption{Individual plots for Task~6.}
+    \label{fig:ex3_task6_individual}
+\end{figure}
+
+\subsubsection{Discussion}
+
+\textbf{Active Power:}
+With $f_B > f_{\text{grid}}$, Gen~B's rotor angle leads the grid, producing $\delta_B > 0$:
+\begin{equation}
+    P_B = \frac{E_B V_{\text{grid}}}{X_d} \sin\delta_B > 0
+\end{equation}
+Gen~B immediately starts \textbf{delivering active power} to the grid. This is the normal operating condition for a grid-connected generator.
+
+\textbf{Controlling Active Power:}
+To increase $P_B$ further after synchronization, the operator must \textbf{increase the governor setpoint} (increase $P_{\text{ref}}$ or $\omega_{\text{ref}}$):
+\begin{equation}
+    \Delta P_B = \frac{\Delta \omega_{\text{ref}}}{R}
+    \label{eq:p_control}
+\end{equation}
+
+Simply changing the excitation (field current) does \textbf{NOT} change active power significantly; it only changes reactive power:
+\begin{equation}
+    \uparrow E_{fd} \xrightarrow{} \uparrow E_B \xrightarrow{} \uparrow Q_B \quad \text{(at constant } \delta \text{)}
+    \label{eq:q_control}
+\end{equation}
+
+This is a fundamental property of grid-connected operation:
+\begin{itemize}[noitemsep]
+    \item \textbf{Governor (speed reference)} $\rightarrow$ controls $P$
+    \item \textbf{AVR (voltage reference)} $\rightarrow$ controls $Q$ and power factor
+\end{itemize}
+
+\textbf{Frequency:}
+The grid frequency remains constant at 50~Hz. Gen~B is locked to grid frequency by the synchronizing torque once in parallel.
+
+\subsubsection{Comparison with Task~4}
+
+\begin{table}[H]
+    \centering
+    \caption{Comparison: Two-Generator (Task~4) vs.\ Infinite Bus (Task~6)}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Parameter} & \textbf{Task 4 (Two Gen)} & \textbf{Task 6 (Infinite Bus)} \\
+        \midrule
+        System frequency     & Increases (both share) & Constant at 50~Hz \\
+        Gen B power          & Shares load with Gen A & Delivers $P$ to grid \\
+        P control            & Affects both machines  & Only Gen B, grid unaffected \\
+        Q control            & Shared adjustment      & Only Gen B adjusts \\
+        Gen A/Grid response  & Reduces its own $P$    & Unaffected \\
+        Stability            & Depends on both droops & Very stable (stiff grid) \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:task46_comparison}
+\end{table}
+
+\newpage
+
+% ========================================================================
+%                           CONCLUSIONS
+% ========================================================================
+\section{Conclusions}
+
+\begin{enumerate}
+    \item \textbf{Single Generator (Exercise~1):} The governor and AVR work as decoupled controllers -- the governor manages active power and frequency via mechanical power adjustment, while the AVR manages reactive power and voltage via field excitation. Machine inertia provides inherent resistance to frequency changes during transients.
+    
+    \item \textbf{Parallel Generators (Exercise~2):} When synchronizing two generators of comparable size, both machines influence the system frequency and voltage. The generator connected at lower frequency tends to motor (absorb $P$), which is undesirable. Connecting at slightly higher frequency is the preferred method as it ensures the oncoming generator immediately picks up load.
+    
+    \item \textbf{Infinite Bus (Exercise~3):} When connecting to a large power system, the grid frequency and voltage remain constant regardless of the small generator's actions. Active power is controlled exclusively by the governor setpoint, and reactive power exclusively by the AVR setpoint. The infinite bus provides a much stiffer reference, leading to faster stabilization of the generator.
+    
+    \item \textbf{Key Design Insight:} For safe synchronization in all cases, the oncoming generator should be: (a) at the same voltage magnitude, (b) at the same phase sequence, (c) at a slightly \textbf{higher} frequency, and (d) in phase (or at a small positive slip angle) with the bus.
+\end{enumerate}
+
+\newpage
+
+% ========================================================================
+%                           REFERENCES
+% ========================================================================
+\section{References}
+
+\begin{enumerate}
+    \item J.\ D.\ Glover, T.\ J.\ Overbye, M.\ S.\ Sarma, \textit{Power Systems Analysis and Design}, 6th ed., Cengage Learning, 2017.
+    \item S.\ J.\ Chapman, \textit{Electric Machinery Fundamentals}, 5th ed., McGraw-Hill, 2012.
+    \item P.\ Kundur, \textit{Power System Stability and Control}, McGraw-Hill, 1994.
+    \item MathWorks, ``Synchronous Machine Control Example,'' MATLAB Simulink Documentation, 2024.
+    \item IEEE Std 421.5, ``IEEE Recommended Practice for Excitation System Models for Power System Stability Studies,'' 2016.
+\end{enumerate}
+
+\newpage
+
+% ========================================================================
+%                           APPENDIX
+% ========================================================================
+\appendix
+\section{MATLAB Code}
+
+\subsection{Exercise 1: Setup and Load Variation}
+\lstinputlisting[caption={Exercise1\_Setup.m}, label={lst:ex1}]{../MATLAB/Exercise1_Setup.m}
+
+\subsection{Exercise 2: Parallel Generators}
+\lstinputlisting[caption={Exercise2\_TwoGenerators.m}, label={lst:ex2}]{../MATLAB/Exercise2_TwoGenerators.m}
+
+\subsection{Exercise 3: Infinite Bus}
+\lstinputlisting[caption={Exercise3\_InfiniteBus.m}, label={lst:ex3}]{../MATLAB/Exercise3_InfiniteBus.m}
+
+\end{document}
