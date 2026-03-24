@@ -1,0 +1,114 @@
+/* ============================================================
+   KaTeX Math Styling Overrides
+   ============================================================ */
+
+/* Ensure KaTeX inherits theme colors */
+.katex { color: var(--text-primary); }
+.katex .mord { color: var(--text-primary); }
+
+/* Display math */
+.katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+.katex-display > .katex {
+  text-align: center;
+}
+
+/* Inline math spacing */
+.katex { font-size: 1.05em; }
+
+/* Equation numbers */
+.eq-number {
+  float: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-left: 1rem;
+}
+
+/* Matrix brackets */
+.katex .mopen, .katex .mclose {
+  color: var(--accent-blue);
+}
+
+/* Colored math highlights */
+.math-green .katex { color: var(--accent-green); }
+.math-blue .katex { color: var(--accent-blue); }
+.math-amber .katex { color: var(--accent-amber); }
+
+/* Inline equation box in derivation steps */
+.derivation-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin: 0.6rem 0;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+.derivation-step:hover {
+  background: rgba(0, 230, 118, 0.03);
+}
+
+.derivation-step .step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  min-width: 1.8rem;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.derivation-step .step-content {
+  flex: 1;
+}
+
+/* Worked example styling */
+.worked-example {
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-amber);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 0 20px rgba(255, 202, 40, 0.08);
+}
+
+.worked-example h4 {
+  color: var(--accent-amber);
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.worked-example h4::before {
+  content: '✎';
+  font-size: 1.2rem;
+}
+
+/* Phasor display */
+.phasor-value {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-green);
+  font-size: 0.9rem;
+}
+
+/* Bus data display */
+.bus-data {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.bus-data .magnitude { color: var(--accent-green); }
+.bus-data .angle { color: var(--accent-blue); }
+.bus-data .power-p { color: var(--accent-green); }
+.bus-data .power-q { color: var(--accent-blue); }

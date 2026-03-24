@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="chapter-id" content="ch1">
+  <title>Chapter 1 — Load Flow Analysis | Power Engineering Theory</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="../../assets/css/main.css">
+  <link rel="stylesheet" href="../../assets/css/math.css">
+  <script src="../../assets/js/theme.js"></script>
+</head>
+<body>
+<div class="page-wrapper">
+
+<!-- Sidebar -->
+<nav class="sidebar" aria-label="Main navigation">
+  <div class="sidebar-header">
+    <div class="logo">⚡</div>
+    <h2>Power Engineering<br>Theory</h2>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section">Chapters</div>
+    <a href="../../index.html"><span class="nav-icon">🏠</span> Home</a>
+    <a href="../01-load-flow-analysis/index.html" class="active"><span class="nav-icon">📊</span> 1. Load Flow Analysis</a>
+    <a href="../02-fault-analysis/index.html"><span class="nav-icon">⚡</span> 2. Fault Analysis</a>
+    <a href="../03-synchronous-machines/index.html"><span class="nav-icon">🔄</span> 3. Synchronous Machines</a>
+    <a href="../04-induction-machines/index.html"><span class="nav-icon">⚙️</span> 4. Induction Machines</a>
+  </div>
+</nav>
+
+<!-- Main -->
+<main class="main-content">
+  <div class="top-bar">
+    <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="breadcrumb"><a href="../../index.html">Home</a> / <span>Load Flow Analysis</span></div>
+    <div class="top-bar-actions"><button class="theme-toggle" tabindex="0" aria-label="Toggle theme"></button></div>
+  </div>
+
+  <div class="content-body">
+
+    <!-- Hero -->
+    <div class="chapter-hero">
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      <div class="hero-overlay">
+        <span class="badge badge-green">Chapter 1</span>
+        <h1>Load Flow Analysis</h1>
+        <p class="hero-subtitle">The fundamental tool for power system planning, operation, and optimisation</p>
+      </div>
+    </div>
+
+    <!-- TOC (right) -->
+    <aside class="toc-aside" aria-label="Table of contents">
+      <h4>On This Page</h4>
+      <a href="#intro">Introduction</a>
+      <a href="#bus-types">Bus Types</a>
+      <a href="#per-unit">Per-Unit System</a>
+      <a href="#ybus">Y-Bus Matrix</a>
+      <a href="#power-flow-eq">Power Flow Equations</a>
+      <a href="#gauss-seidel">Gauss-Seidel Method</a>
+      <a href="#newton-raphson">Newton-Raphson Method</a>
+      <a href="#fdlf">Fast Decoupled LF</a>
+      <a href="#pv-curve">Voltage Collapse</a>
+      <a href="#sim-ybus">Sim: Y-Bus Builder</a>
+      <a href="#sim-nr">Sim: NR Solver</a>
+      <a href="#sim-gs">Sim: GS Solver</a>
+      <a href="#sim-pv">Sim: P-V Curve</a>
+      <a href="#quick-ref">Quick Reference</a>
+    </aside>
+
+    <!-- ===== CONTENT ===== -->
+
+    <h2 id="intro">1.1 Introduction</h2>
+    <p>Load flow (or power flow) analysis is the backbone of power system studies. It determines the steady-state operating condition of a power network — the voltage magnitude and angle at every bus, and the real and reactive power flowing through every line. Results are essential for:</p>
+    <ul>
+      <li>System planning and expansion studies</li>
+      <li>Economic dispatch and generation scheduling</li>
+      <li>Voltage regulation and reactive power management</li>
+      <li>Contingency analysis (N-1 security)</li>
+      <li>Setting initial conditions for dynamic simulations</li>
+    </ul>
+
+    <h2 id="bus-types">1.2 Bus Classification</h2>
+    <p>Every bus in a power system is classified into one of three types based on what quantities are known (specified) versus unknown:</p>
+
+    <table>
+      <thead><tr><th>Bus Type</th><th>Known</th><th>Unknown</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Slack (Swing) Bus</strong></td><td>$|V|, \delta$ (usually $1.0\angle 0°$)</td><td>$P, Q$</td><td>Reference bus; absorbs power mismatch</td></tr>
+        <tr><td><strong>PV (Generator) Bus</strong></td><td>$P, |V|$</td><td>$Q, \delta$</td><td>Generators with AVR holding voltage</td></tr>
+        <tr><td><strong>PQ (Load) Bus</strong></td><td>$P, Q$</td><td>$|V|, \delta$</td><td>Loads and unregulated buses</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-box">
+      <strong>Key insight:</strong> A power system with $n$ buses has $2n$ real unknowns ($|V_i|$ and $\delta_i$ for each bus). The slack bus fixes 2 variables; each PV bus specifies 2 ($P, |V|$); each PQ bus specifies 2 ($P, Q$). This yields exactly $2(n-1) - n_{PV}$ independent equations to solve for $n_{PQ}$ magnitude unknowns and $(n-1)$ angle unknowns.
+    </div>
+
+    <h2 id="per-unit">1.3 The Per-Unit System</h2>
+
+    <div class="collapsible open">
+      <div class="collapsible-header"><span class="chevron">▶</span> Derivation: Per-Unit Base Quantities</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>The per-unit system normalises all quantities to chosen base values, eliminating transformer turns ratios and simplifying calculations.</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">Choose a system-wide <strong>base apparent power</strong> $S_{base}$ (typically 100 MVA) and a <strong>base voltage</strong> $V_{base}$ at each voltage level.</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">Base impedance: $$Z_{base} = \frac{V_{base}^2}{S_{base}} = \frac{(kV_{base})^2}{MVA_{base}}$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content">Base current: $$I_{base} = \frac{S_{base}}{\sqrt{3}\, V_{base}} = \frac{MVA_{base} \times 10^3}{\sqrt{3}\, kV_{base}}$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">4</span>
+          <div class="step-content">Per-unit value of any quantity: $$x_{pu} = \frac{x_{actual}}{x_{base}}$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">5</span>
+          <div class="step-content"><strong>Base conversion</strong> — if an impedance is given in old bases $(kV_{old}, MVA_{old})$ and we need it in new bases $(kV_{new}, MVA_{new})$:
+          $$Z_{pu,new} = Z_{pu,old} \times \frac{kV_{old}^2}{kV_{new}^2} \times \frac{MVA_{new}}{MVA_{old}}$$</div>
+        </div>
+      </div></div>
+    </div>
+
+    <h2 id="ybus">1.4 Bus Admittance Matrix (Y-Bus)</h2>
+
+    <p>The bus admittance matrix $\mathbf{Y}_{bus}$ encodes the network topology and impedances in a single $n \times n$ complex matrix. It is the foundation of all power flow calculations.</p>
+
+    <div class="collapsible open">
+      <div class="collapsible-header"><span class="chevron">▶</span> Formation Algorithm</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>For each branch connecting bus $i$ to bus $j$ with series impedance $z_{ij} = r_{ij} + jx_{ij}$ and half-line charging susceptance $b_{ij}/2$:</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">Compute the series admittance: $y_{ij} = \frac{1}{z_{ij}} = \frac{r_{ij} - jx_{ij}}{r_{ij}^2 + x_{ij}^2}$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content"><strong>Off-diagonal elements</strong> (mutual admittance): $$Y_{ij} = Y_{ji} = -y_{ij}$$ The negative of the series admittance between buses $i$ and $j$.</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content"><strong>Diagonal elements</strong> (self admittance): $$Y_{ii} = \sum_{\substack{k=1 \\ k \neq i}}^{n} y_{ik} + \sum_k \frac{b_{ik}}{2}$$ The sum of all admittances connected to bus $i$ (including shunt elements).</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="worked-example">
+      <h4>Worked Example: 3-Bus Y-Bus</h4>
+      <p>Consider a 3-bus system: $z_{12} = 0.02 + j0.06$ pu, $z_{13} = 0.04 + j0.12$ pu, $z_{23} = 0.03 + j0.09$ pu (no shunt charging).</p>
+      <p>Series admittances:</p>
+      $$y_{12} = \frac{1}{0.02+j0.06} = 5.00 - j15.00$$
+      $$y_{13} = \frac{1}{0.04+j0.12} = 2.50 - j7.50$$
+      $$y_{23} = \frac{1}{0.03+j0.09} = 3.33 - j10.00$$
+      <p>Y-bus matrix:</p>
+      $$\mathbf{Y}_{bus} = \begin{bmatrix} 7.50 - j22.50 & -5.00 + j15.00 & -2.50 + j7.50 \\ -5.00 + j15.00 & 8.33 - j25.00 & -3.33 + j10.00 \\ -2.50 + j7.50 & -3.33 + j10.00 & 5.83 - j17.50 \end{bmatrix}$$
+      <p><strong>Sparsity:</strong> In large systems, most buses connect to only a few neighbours, making $\mathbf{Y}_{bus}$ very sparse — typically 3–5 non-zero entries per row in a 1000-bus system.</p>
+    </div>
+
+    <h2 id="power-flow-eq">1.5 Power Flow Equations</h2>
+
+    <div class="collapsible open">
+      <div class="collapsible-header"><span class="chevron">▶</span> Full Derivation of Power Mismatch Equations</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>The complex power injected at bus $i$ is:</p>
+        $$S_i = P_i + jQ_i = V_i I_i^*$$
+
+        <p>where the current injection is given by Kirchhoff's current law:</p>
+        $$I_i = \sum_{k=1}^{n} Y_{ik} V_k$$
+
+        <p>Substituting and writing $V_i = |V_i|e^{j\delta_i}$, $Y_{ik} = |Y_{ik}|e^{j\theta_{ik}} = G_{ik} + jB_{ik}$:</p>
+        $$S_i^* = V_i^* \sum_{k=1}^{n} Y_{ik} V_k$$
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">Expand: $P_i - jQ_i = |V_i|e^{-j\delta_i} \sum_{k=1}^{n} (G_{ik} + jB_{ik})|V_k|e^{j\delta_k}$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">Separate real and imaginary parts with $\theta_{ik} = \delta_i - \delta_k$:</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="equation-box">
+      <span class="eq-label">Active Power</span>
+      $$P_i = \sum_{k=1}^{n} |V_i||V_k|\left(G_{ik}\cos\theta_{ik} + B_{ik}\sin\theta_{ik}\right)$$
+    </div>
+
+    <div class="equation-box blue">
+      <span class="eq-label">Reactive Power</span>
+      $$Q_i = \sum_{k=1}^{n} |V_i||V_k|\left(G_{ik}\sin\theta_{ik} - B_{ik}\cos\theta_{ik}\right)$$
+    </div>
+
+    <p><strong>Physical meaning:</strong> $G_{ik}\cos\theta_{ik}$ represents the real power transfer component due to the conductance; $B_{ik}\sin\theta_{ik}$ captures the reactive power transfer through the susceptance, driven by the voltage angle difference $\theta_{ik}$. These are $2n$ coupled nonlinear algebraic equations — no closed-form solution exists for systems with more than 2 buses.</p>
+
+    <h2 id="gauss-seidel">1.6 Gauss-Seidel Method</h2>
+
+    <div class="collapsible open">
+      <div class="collapsible-header"><span class="chevron">▶</span> Full Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>From $S_i^* = V_i^* \sum_k Y_{ik}V_k$, isolate $V_i$:</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">$$P_i - jQ_i = V_i^* \left(Y_{ii}V_i + \sum_{k \neq i} Y_{ik}V_k\right)$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">Rearrange for $V_i$: $$V_i = \frac{1}{Y_{ii}}\left(\frac{P_i - jQ_i}{V_i^*} - \sum_{k \neq i} Y_{ik}V_k\right)$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content">Iterative update rule (using latest values): $$V_i^{(\nu+1)} = \frac{1}{Y_{ii}}\left(\frac{P_i^{spec} - jQ_i^{spec}}{V_i^{(\nu)*}} - \sum_{k=1}^{i-1} Y_{ik}V_k^{(\nu+1)} - \sum_{k=i+1}^{n} Y_{ik}V_k^{(\nu)}\right)$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">4</span>
+          <div class="step-content"><strong>Acceleration factor $\omega$:</strong> To speed convergence, apply: $$V_i^{acc} = V_i^{(\nu)} + \omega\left(V_i^{(\nu+1)} - V_i^{(\nu)}\right)$$ Typically $1.4 \leq \omega \leq 1.8$. Values outside $[1, 2]$ cause divergence.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="info-box warning">
+      <strong>Limitations:</strong> Gauss-Seidel converges linearly (slow), requires many iterations (50–1000+), and may fail for ill-conditioned networks. It is simple but rarely used for production-grade power flow.
+    </div>
+
+    <h2 id="newton-raphson">1.7 Newton-Raphson Method</h2>
+
+    <div class="collapsible open">
+      <div class="collapsible-header"><span class="chevron">▶</span> Full Jacobian Matrix Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>The Newton-Raphson method solves the nonlinear power flow equations by linearising them at each iteration using the Jacobian matrix.</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">Define the mismatch vector: $$\Delta P_i = P_i^{spec} - P_i^{calc}, \qquad \Delta Q_i = Q_i^{spec} - Q_i^{calc}$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">The Jacobian has a $2 \times 2$ block structure:
+          $$\begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix} = \begin{bmatrix} J_1 & J_2 \\ J_3 & J_4 \end{bmatrix} \begin{bmatrix} \Delta\delta \\ \Delta|V|/|V| \end{bmatrix}$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content">The four Jacobian sub-matrices (off-diagonal, $i \neq k$):
+          $$J_1: \frac{\partial P_i}{\partial \delta_k} = |V_i||V_k|(G_{ik}\sin\theta_{ik} - B_{ik}\cos\theta_{ik})$$
+          $$J_2: \frac{\partial P_i}{\partial |V_k|} = |V_i|(G_{ik}\cos\theta_{ik} + B_{ik}\sin\theta_{ik})$$
+          $$J_3: \frac{\partial Q_i}{\partial \delta_k} = -|V_i||V_k|(G_{ik}\cos\theta_{ik} + B_{ik}\sin\theta_{ik})$$
+          $$J_4: \frac{\partial Q_i}{\partial |V_k|} = |V_i|(G_{ik}\sin\theta_{ik} - B_{ik}\cos\theta_{ik})$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">4</span>
+          <div class="step-content">Diagonal elements ($i = k$) involve sums over all connected buses and include the computed $P_i$, $Q_i$ terms. For example: $$\frac{\partial P_i}{\partial \delta_i} = -Q_i - B_{ii}|V_i|^2$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">5</span>
+          <div class="step-content"><strong>Update step:</strong> $$\begin{bmatrix} \Delta\delta \\ \Delta|V|/|V| \end{bmatrix}^{(\nu)} = \mathbf{J}^{-1} \begin{bmatrix} \Delta P \\ \Delta Q \end{bmatrix}^{(\nu)}$$
+          Then: $\delta^{(\nu+1)} = \delta^{(\nu)} + \Delta\delta$, $|V|^{(\nu+1)} = |V|^{(\nu)}(1 + \Delta|V|/|V|)$.</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">6</span>
+          <div class="step-content"><strong>Quadratic convergence:</strong> The error $\epsilon^{(\nu+1)} \propto C(\epsilon^{(\nu)})^2$. Typically converges in 3–6 iterations regardless of system size. This is because Newton-Raphson incorporates second-order curvature information implicitly through the Jacobian update.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="equation-box">
+      <span class="eq-label">Newton-Raphson Update</span>
+      $$\begin{bmatrix} \Delta\boldsymbol{\delta} \\ \Delta|\mathbf{V}|/|\mathbf{V}| \end{bmatrix} = \begin{bmatrix} J_1 & J_2 \\ J_3 & J_4 \end{bmatrix}^{-1} \begin{bmatrix} \Delta\mathbf{P} \\ \Delta\mathbf{Q} \end{bmatrix}$$
+    </div>
+
+    <h2 id="fdlf">1.8 Fast Decoupled Load Flow (FDLF)</h2>
+
+    <div class="collapsible">
+      <div class="collapsible-header"><span class="chevron">▶</span> $B'$ and $B''$ Matrix Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>The FDLF exploits the weak coupling between $P$-$\delta$ and $Q$-$|V|$ in high-voltage transmission systems where $R \ll X$ and angle differences are small.</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content"><strong>Approximations:</strong> $\cos\theta_{ik} \approx 1$, $G_{ik}\sin\theta_{ik} \ll B_{ik}$, and $Q_i \ll B_{ii}|V_i|^2$.</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">This decouples the Jacobian into two independent systems:
+          $$\frac{\Delta P}{|V|} = -B' \cdot \Delta\delta$$
+          $$\frac{\Delta Q}{|V|} = -B'' \cdot \Delta|V|$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content">$B'$ is formed from imaginary parts of $Y_{bus}$ neglecting shunt elements and resistance. $B''$ is formed from full imaginary parts of $Y_{bus}$. Both are real, sparse, constant matrices — factored only once!</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">4</span>
+          <div class="step-content">The FDLF iterates: solve for $\Delta\delta$, update angles, compute new $\Delta Q$, solve for $\Delta|V|$, update voltages. Each half-iteration is very cheap.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="info-box success">
+      <strong>When FDLF works best:</strong> High-voltage transmission networks where $X/R > 4$, angle differences $< 15°$, and no series compensation. It fails for distribution systems or networks with high R/X ratios.
+    </div>
+
+    <h2 id="pv-curve">1.9 Voltage Collapse & P-V Curves</h2>
+
+    <div class="collapsible">
+      <div class="collapsible-header"><span class="chevron">▶</span> Nose Curve Derivation</div>
+      <div class="collapsible-body"><div class="collapsible-content">
+        <p>Consider a simple 2-bus system: sending end at voltage $V_s = 1.0$ pu, load bus receiving $P + jQ$ through a line with reactance $X$.</p>
+
+        <div class="derivation-step">
+          <span class="step-num">1</span>
+          <div class="step-content">Power equations: $P = \frac{V_s V_r}{X}\sin\delta$, $Q = \frac{V_s V_r \cos\delta - V_r^2}{X}$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">2</span>
+          <div class="step-content">Eliminating $\delta$ yields a quartic in $V_r^2$: $$V_r^4 + (2XQ - V_s^2)V_r^2 + X^2(P^2 + Q^2) = 0$$</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">3</span>
+          <div class="step-content">The discriminant $\Delta = (2XQ - V_s^2)^2 - 4X^2(P^2+Q^2)$ must be $\geq 0$ for a solution to exist. The boundary $\Delta = 0$ defines the <strong>nose point</strong> — the maximum loadability.</div>
+        </div>
+
+        <div class="derivation-step">
+          <span class="step-num">4</span>
+          <div class="step-content">The upper solution (high voltage) is the stable operating point. The lower solution is unstable. At the nose, they merge — <strong>voltage collapse</strong>. Reactive power compensation shifts the curve upward, increasing the loadability limit.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <hr style="border-color:var(--border-color);margin:3rem 0;">
+    <h2 style="text-align:center;">Interactive Simulations</h2>
+
+    <!-- SIM: Y-Bus Builder -->
+    <div class="sim-container" id="sim-ybus">
+      <div class="sim-header">
+        <h3 id="sim-ybus-title">🔌 Y-Bus Builder</h3>
+        <div class="sim-controls"><span class="badge badge-green">Interactive</span></div>
+      </div>
+      <div id="ybus-builder-sim"></div>
+    </div>
+
+    <!-- SIM: Newton-Raphson Solver -->
+    <div class="sim-container" id="sim-nr">
+      <div class="sim-header">
+        <h3 id="sim-nr-title">📐 Newton-Raphson Load Flow Solver</h3>
+        <div class="sim-controls"><span class="badge badge-blue">5-Bus IEEE</span></div>
+      </div>
+      <div id="nr-solver-sim"></div>
+    </div>
+
+    <!-- SIM: Gauss-Seidel Solver -->
+    <div class="sim-container" id="sim-gs">
+      <div class="sim-header">
+        <h3 id="sim-gs-title">🔄 Gauss-Seidel Solver</h3>
+        <div class="sim-controls"><span class="badge badge-amber">Step-by-Step</span></div>
+      </div>
+      <div id="gs-solver-sim"></div>
+    </div>
+
+    <!-- SIM: P-V Nose Curve -->
+    <div class="sim-container" id="sim-pv">
+      <div class="sim-header">
+        <h3 id="sim-pv-title">📈 P-V Nose Curve Explorer</h3>
+        <div class="sim-controls"><span class="badge badge-red">Voltage Collapse</span></div>
+      </div>
+      <div id="pv-curve-sim"></div>
+    </div>
+
+    <!-- Quick Reference -->
+    <div class="quick-ref" id="quick-ref">
+      <h2>⚡ Quick Reference — Load Flow Analysis</h2>
+      <div class="formula-grid">
+        <div class="formula-card">
+          <h4>Power Flow (P)</h4>
+          <div>$$P_i = \sum_k |V_i||V_k|(G_{ik}\cos\theta_{ik} + B_{ik}\sin\theta_{ik})$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Power Flow (Q)</h4>
+          <div>$$Q_i = \sum_k |V_i||V_k|(G_{ik}\sin\theta_{ik} - B_{ik}\cos\theta_{ik})$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Gauss-Seidel Update</h4>
+          <div>$$V_i^{(\nu+1)} = \frac{1}{Y_{ii}}\left(\frac{S_i^*}{V_i^{(\nu)*}} - \sum_{k\neq i} Y_{ik}V_k\right)$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Newton-Raphson</h4>
+          <div>$$\mathbf{x}^{(\nu+1)} = \mathbf{x}^{(\nu)} - \mathbf{J}^{-1}\mathbf{f}(\mathbf{x}^{(\nu)})$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Per-Unit Conversion</h4>
+          <div>$$Z_{pu,new} = Z_{pu,old}\frac{kV_{old}^2}{kV_{new}^2}\frac{MVA_{new}}{MVA_{old}}$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Y-Bus Elements</h4>
+          <div>$$Y_{ii} = \sum_{k\neq i} y_{ik}, \quad Y_{ij} = -y_{ij}$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>FDLF</h4>
+          <div>$$\Delta P / |V| = -B'\Delta\delta$$$$\Delta Q / |V| = -B''\Delta|V|$$</div>
+        </div>
+        <div class="formula-card">
+          <h4>Voltage Collapse</h4>
+          <div>$$V_r^4 + (2XQ-V_s^2)V_r^2 + X^2(P^2+Q^2)=0$$</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-body -->
+</main>
+</div><!-- /page-wrapper -->
+
+<!-- Scripts -->
+<script src="../../assets/js/simulations.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="sim/bus-admittance.js"></script>
+<script src="sim/newton-raphson.js"></script>
+<script src="sim/gauss-seidel.js"></script>
+<script>
+  // Init simulations
+  YBusBuilderSim.create('ybus-builder-sim');
+  NewtonRaphsonSim.create('nr-solver-sim');
+  GaussSeidelSim.create('gs-solver-sim');
+  PVCurveSim.create('pv-curve-sim');
+
+  // Hero animation
+  (function(){
+    var c = document.getElementById('hero-canvas');
+    if(!c) return;
+    var par = c.parentElement, w, h, ctx, dpr;
+    function resize(){
+      w = par.offsetWidth; h = par.offsetHeight;
+      dpr = window.devicePixelRatio||1;
+      c.width = w*dpr; c.height = h*dpr;
+      c.style.width = w+'px'; c.style.height = h+'px';
+      ctx = c.getContext('2d'); ctx.scale(dpr,dpr);
+    }
+    resize(); window.addEventListener('resize', resize);
+
+    var t = 0;
+    function draw(){
+      t += 0.016;
+      ctx.clearRect(0,0,w,h);
+      // Grid
+      ctx.strokeStyle = 'rgba(38,48,70,0.3)'; ctx.lineWidth = 0.5;
+      for(var x=0;x<w;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+      for(var y=0;y<h;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+
+      // Bus network animation
+      var buses = [{x:w*0.15,y:h*0.3},{x:w*0.4,y:h*0.2},{x:w*0.65,y:h*0.25},{x:w*0.85,y:h*0.4},{x:w*0.55,y:h*0.65},{x:w*0.25,y:h*0.7}];
+      var lines = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,0],[1,4],[2,5]];
+
+      lines.forEach(function(l){
+        var a=buses[l[0]],b=buses[l[1]];
+        ctx.strokeStyle='rgba(0,230,118,0.2)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        // Flow dot
+        var frac=((t*0.2+l[0]*0.15)%1);
+        ctx.fillStyle='rgba(0,230,118,0.5)';
+        ctx.beginPath();ctx.arc(a.x+(b.x-a.x)*frac,a.y+(b.y-a.y)*frac,2.5,0,Math.PI*2);ctx.fill();
+      });
+
+      buses.forEach(function(b){
+        ctx.fillStyle='rgba(64,196,255,0.3)';
+        ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Engineering Theory — An Interactive Journey</title>
+  <meta name="description" content="A complete, interactive web-based textbook covering Power Engineering: Load Flow, Fault Analysis, Synchronous & Induction Machines.">
+
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/math.css">
+
+  <!-- Theme (load early) -->
+  <script src="assets/js/theme.js"></script>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="landing-hero" id="hero">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-content">
+    <h1>Power Engineering Theory</h1>
+    <p class="subtitle">An Interactive Journey Through Load Flow Analysis, Fault Studies, Synchronous &amp; Induction Machines</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;">
+      <a href="#chapters" class="btn btn-primary" style="font-size:1rem;padding:0.7rem 1.6rem;">Explore Chapters</a>
+      <button class="theme-toggle" tabindex="0" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHAPTERS ============ -->
+<section id="chapters" style="padding:4rem 0;">
+  <h2 style="text-align:center;border:none;margin-bottom:0.3rem;">Chapters</h2>
+  <p style="text-align:center;color:var(--text-secondary);margin-bottom:2rem;">Select a topic to begin studying</p>
+  <div class="chapter-grid">
+
+    <!-- Ch 1 -->
+    <a href="chapters/01-load-flow-analysis/index.html" class="chapter-card">
+      <div class="card-preview" id="preview1"><canvas id="prev1Canvas" aria-hidden="true"></canvas></div>
+      <div class="card-body">
+        <span class="badge badge-green">Chapter 1</span>
+        <h3>Load Flow Analysis</h3>
+        <p>Y-Bus formation, Gauss-Seidel, Newton-Raphson, FDLF, voltage collapse &amp; P-V curves.</p>
+        <div class="progress-bar" data-progress-chapter="ch1"><div class="fill"></div></div>
+      </div>
+    </a>
+
+    <!-- Ch 2 -->
+    <a href="chapters/02-fault-analysis/index.html" class="chapter-card">
+      <div class="card-preview" id="preview2"><canvas id="prev2Canvas" aria-hidden="true"></canvas></div>
+      <div class="card-body">
+        <span class="badge badge-blue">Chapter 2</span>
+        <h3>Fault Analysis</h3>
+        <p>Symmetrical components, sequence networks, SLG / LL / DLG faults, fault current oscillograms.</p>
+        <div class="progress-bar" data-progress-chapter="ch2"><div class="fill"></div></div>
+      </div>
+    </a>
+
+    <!-- Ch 3 -->
+    <a href="chapters/03-synchronous-machines/index.html" class="chapter-card">
+      <div class="card-preview" id="preview3"><canvas id="prev3Canvas" aria-hidden="true"></canvas></div>
+      <div class="card-body">
+        <span class="badge badge-amber">Chapter 3</span>
+        <h3>Synchronous Machines</h3>
+        <p>Phasor diagrams, power-angle curves, salient-pole theory, capability curves, swing equation.</p>
+        <div class="progress-bar" data-progress-chapter="ch3"><div class="fill"></div></div>
+      </div>
+    </a>
+
+    <!-- Ch 4 -->
+    <a href="chapters/04-induction-machines/index.html" class="chapter-card">
+      <div class="card-preview" id="preview4"><canvas id="prev4Canvas" aria-hidden="true"></canvas></div>
+      <div class="card-body">
+        <span class="badge badge-purple">Chapter 4</span>
+        <h3>Induction Machines</h3>
+        <p>Equivalent circuit, torque-speed curves, power flow, VFD speed control, Sankey diagrams.</p>
+        <div class="progress-bar" data-progress-chapter="ch4"><div class="fill"></div></div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ============ KEY EQUATIONS ============ -->
+<section class="equations-showcase" id="equations">
+  <h2 style="text-align:center;border:none;margin-bottom:0.3rem;">Key Equations of Power Engineering</h2>
+  <p style="text-align:center;color:var(--text-secondary);margin-bottom:2rem;">Click to reveal the physical meaning</p>
+
+  <div class="eq-item" onclick="this.classList.toggle('open')">
+    <div style="text-align:center;font-size:1.1rem;">$$P_i = \sum_{k=1}^{n} |V_i||V_k|\big(G_{ik}\cos\theta_{ik} + B_{ik}\sin\theta_{ik}\big)$$</div>
+    <div class="eq-explanation">
+      <strong>Power Flow Equation:</strong> The real power injected at bus $i$ equals the sum of power transfers to every other bus $k$, determined by bus voltage magnitudes, the conductance $G_{ik}$ and susceptance $B_{ik}$ of the admittance matrix, and the voltage angle difference $\theta_{ik} = \delta_i - \delta_k$.
+    </div>
+  </div>
+
+  <div class="eq-item" onclick="this.classList.toggle('open')">
+    <div style="text-align:center;font-size:1.1rem;">$$M\frac{d^2\delta}{dt^2} = P_m - P_e = P_m - \frac{E_f V_t}{X_s}\sin\delta$$</div>
+    <div class="eq-explanation">
+      <strong>Swing Equation:</strong> The rotor's angular acceleration is proportional to the difference between mechanical input power $P_m$ and electrical output power $P_e$. The inertia constant $M = 2H/\omega_s$ determines how quickly the rotor responds. This is the foundation of transient stability analysis.
+    </div>
+  </div>
+
+  <div class="eq-item" onclick="this.classList.toggle('open')">
+    <div style="text-align:center;font-size:1.1rem;">$$T = \frac{3}{\omega_s} \cdot \frac{V_1^2 \, R_2'/s}{\left(R_1 + R_2'/s\right)^2 + \left(X_1 + X_2'\right)^2}$$</div>
+    <div class="eq-explanation">
+      <strong>Induction Motor Torque:</strong> Developed torque depends on slip $s$, rotor resistance $R_2'$, and the Thevenin impedance seen from the rotor. Maximum (breakdown) torque occurs at a specific slip $s_T$ and is independent of rotor resistance — only the slip at which it occurs changes.
+    </div>
+  </div>
+
+  <div class="eq-item" onclick="this.classList.toggle('open')">
+    <div style="text-align:center;font-size:1.1rem;">$$Z_{pu,new} = Z_{pu,old} \times \frac{kV_{old}^2}{kV_{new}^2} \times \frac{MVA_{new}}{MVA_{old}}$$</div>
+    <div class="eq-explanation">
+      <strong>Per-Unit Base Conversion:</strong> When converting impedances between per-unit systems with different voltage or power bases, this formula scales the per-unit value. The per-unit system simplifies power system calculations by normalising quantities to common bases, eliminating transformer turns ratios.
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer style="text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:0.85rem;border-top:1px solid var(--border-color);">
+  <p>Power Engineering Theory &mdash; An open-source interactive textbook</p>
+  <p style="margin-top:0.3rem;">Built with pure HTML, CSS &amp; JavaScript &middot; KaTeX &middot; Chart.js</p>
+  <p style="margin-top:0.3rem;">&copy; 2026 &middot; MIT License</p>
+</footer>
+
+<!-- ============ SCRIPTS ============ -->
+<script src="assets/js/nav.js"></script>
+<script>
+/* ===== Hero Background Animation — Three-Phase Phasor Diagram ===== */
+(function () {
+  var canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  var w, h, ctx, dpr;
+
+  function resize() {
+    var rect = canvas.parentElement.getBoundingClientRect();
+    w = rect.width; h = rect.height;
+    dpr = window.devicePixelRatio || 1;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var time = 0;
+  function draw(dt) {
+    time += dt;
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = 'rgba(38,48,70,0.3)';
+    ctx.lineWidth = 0.5;
+    var sp = 40;
+    for (var x = 0; x < w; x += sp) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (var y = 0; y < h; y += sp) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+    // Phasor center
+    var cx = w * 0.5, cy = h * 0.5;
+    var radius = Math.min(w, h) * 0.25;
+
+    // Draw dashed circle
+    ctx.strokeStyle = 'rgba(144,164,174,0.15)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.arc(cx, cy, radius, 0, 2 * Math.PI); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Three phasors
+    var omega = 0.8; // rad/s
+    var phases = [
+      { color: '#00e676', offset: 0, label: 'A' },
+      { color: '#40c4ff', offset: -2 * Math.PI / 3, label: 'B' },
+      { color: '#ffca28', offset: -4 * Math.PI / 3, label: 'C' }
+    ];
+
+    phases.forEach(function (p) {
+      var angle = omega * time + p.offset;
+      var ex = cx + radius * Math.cos(angle);
+      var ey = cy - radius * Math.sin(angle);
+
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 2.5;
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+
+      // Arrowhead
+      var headLen = 10;
+      var a = Math.atan2(cy - ey, ex - cx);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.moveTo(ex, ey);
+      ctx.lineTo(ex - headLen * Math.cos(a - 0.3), ey + headLen * Math.sin(a - 0.3));
+      ctx.lineTo(ex - headLen * Math.cos(a + 0.3), ey + headLen * Math.sin(a + 0.3));
+      ctx.closePath(); ctx.fill();
+
+      // Dot at tip
+      ctx.beginPath(); ctx.arc(ex, ey, 4, 0, 2 * Math.PI); ctx.fill();
+
+      // Trail
+      ctx.globalAlpha = 0.08;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (var t = 0; t < 2 * Math.PI; t += 0.05) {
+        var tx = cx + radius * Math.cos(angle - t);
+        var ty = cy - radius * Math.sin(angle - t);
+        if (t === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+
+    // Center dot
+    ctx.fillStyle = '#eceff1';
+    ctx.beginPath(); ctx.arc(cx, cy, 3, 0, 2 * Math.PI); ctx.fill();
+
+    // Decorative bus nodes at edges
+    var busPositions = [
+      { x: w * 0.12, y: h * 0.2 }, { x: w * 0.88, y: h * 0.3 },
+      { x: w * 0.15, y: h * 0.75 }, { x: w * 0.85, y: h * 0.8 },
+      { x: w * 0.5, y: h * 0.1 }
+    ];
+
+    ctx.globalAlpha = 0.15;
+    busPositions.forEach(function (b, i) {
+      // Node
+      ctx.strokeStyle = '#00e676';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(b.x, b.y, 8, 0, 2 * Math.PI); ctx.stroke();
+
+      // Connection lines between adjacent nodes
+      if (i < busPositions.length - 1) {
+        var next = busPositions[i + 1];
+        ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(next.x, next.y); ctx.stroke();
+      }
+    });
+    // Connect last to first
+    ctx.beginPath(); ctx.moveTo(busPositions[4].x, busPositions[4].y); ctx.lineTo(busPositions[0].x, busPositions[0].y); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  var lastT = 0;
+  function loop(ts) {
+    var dt = lastT ? (ts - lastT) / 1000 : 0.016;
+    dt = Math.min(dt, 0.1);
+    lastT = ts;
+    draw(dt);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ===== Card Preview Animations ===== */
+(function () {
+  function animatePreview(canvasId, drawFn) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    var parent = canvas.parentElement;
+    var w, h, ctx, dpr;
+
+    function resize() {
+      w = parent.offsetWidth; h = parent.offsetHeight;
+      dpr = window.devicePixelRatio || 1;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      ctx = canvas.getContext('2d');
+      ctx.scale(dpr, dpr);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var t = 0;
+    function loop(ts) {
+      t += 0.016;
+      drawFn(ctx, w, h, t);
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // Chapter 1: Bus diagram
+  animatePreview('prev1Canvas', function (ctx, w, h, t) {
+    ctx.clearRect(0, 0, w, h);
+    var buses = [
+      { x: w * 0.2, y: h * 0.35 }, { x: w * 0.5, y: h * 0.25 },
+      { x: w * 0.8, y: h * 0.35 }, { x: w * 0.35, y: h * 0.7 },
+      { x: w * 0.65, y: h * 0.7 }
+    ];
+    var lines = [[0,1],[1,2],[0,3],[3,4],[4,2],[1,4]];
+
+    // Lines with flowing dots
+    lines.forEach(function (l) {
+      var a = buses[l[0]], b = buses[l[1]];
+      ctx.strokeStyle = 'rgba(0,230,118,0.3)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+
+      // Flow dot
+      var frac = ((t * 0.3 + l[0] * 0.2) % 1);
+      var dx = a.x + (b.x - a.x) * frac;
+      var dy = a.y + (b.y - a.y) * frac;
+      ctx.fillStyle = '#00e676';
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath(); ctx.arc(dx, dy, 3, 0, 2 * Math.PI); ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+
+    // Bus nodes
+    buses.forEach(function (b, i) {
+      ctx.fillStyle = i === 0 ? '#ffca28' : '#40c4ff';
+      ctx.beginPath(); ctx.arc(b.x, b.y, 7, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = '#0b0f1a';
+      ctx.font = 'bold 9px Inter';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(i + 1, b.x, b.y);
+    });
+  });
+
+  // Chapter 2: Fault tree
+  animatePreview('prev2Canvas', function (ctx, w, h, t) {
+    ctx.clearRect(0, 0, w, h);
+    var cx = w / 2, top = 25;
+    // Main bus line
+    ctx.strokeStyle = 'rgba(64,196,255,0.5)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(w * 0.15, top); ctx.lineTo(w * 0.85, top); ctx.stroke();
+
+    // Branches
+    var faultTypes = ['3Φ', 'SLG', 'LL', 'DLG'];
+    var cols = ['#ff5252', '#00e676', '#40c4ff', '#ffca28'];
+    faultTypes.forEach(function (ft, i) {
+      var x = w * (0.2 + i * 0.2);
+      ctx.strokeStyle = cols[i];
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, h * 0.5); ctx.stroke();
+      // Fault flash
+      var flash = Math.sin(t * 3 + i) * 0.5 + 0.5;
+      ctx.globalAlpha = flash * 0.8;
+      ctx.fillStyle = cols[i];
+      ctx.beginPath(); ctx.arc(x, h * 0.5, 6 + flash * 4, 0, 2 * Math.PI); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.font = 'bold 10px JetBrains Mono';
+      ctx.fillStyle = '#eceff1';
+      ctx.textAlign = 'center';
+      ctx.fillText(ft, x, h * 0.7);
+    });
+  });
+
+  // Chapter 3: Spinning phasor
+  animatePreview('prev3Canvas', function (ctx, w, h, t) {
+    ctx.clearRect(0, 0, w, h);
+    var cx = w / 2, cy = h / 2;
+    var r = Math.min(w, h) * 0.3;
+
+    // Circle
+    ctx.strokeStyle = 'rgba(255,202,40,0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2 * Math.PI); ctx.stroke();
+
+    // Ef phasor
+    var delta = 0.5 + 0.3 * Math.sin(t * 0.5);
+    var efAngle = delta;
+    ctx.strokeStyle = '#ffca28'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * 1.1 * Math.cos(efAngle), cy - r * 1.1 * Math.sin(efAngle));
+    ctx.stroke();
+
+    // Vt phasor
+    ctx.strokeStyle = '#00e676'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r, cy);
+    ctx.stroke();
+
+    // jIaXs drop
+    ctx.strokeStyle = '#40c4ff'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.beginPath();
+    ctx.moveTo(cx + r, cy);
+    ctx.lineTo(cx + r * 1.1 * Math.cos(efAngle), cy - r * 1.1 * Math.sin(efAngle));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Labels
+    ctx.font = 'bold 11px JetBrains Mono';
+    ctx.fillStyle = '#ffca28'; ctx.fillText('Ef', cx + r * 0.6 * Math.cos(efAngle) - 15, cy - r * 0.6 * Math.sin(efAngle));
+    ctx.fillStyle = '#00e676'; ctx.fillText('Vt', cx + r * 0.5, cy + 15);
+    ctx.fillStyle = '#40c4ff'; ctx.fillText('δ', cx + r * 0.2, cy - 8);
+  });
+
+  // Chapter 4: Torque-speed curve
+  animatePreview('prev4Canvas', function (ctx, w, h, t) {
+    ctx.clearRect(0, 0, w, h);
+    var pad = 30;
+    var gw = w - 2 * pad, gh = h - 2 * pad;
+
+    // Axes
+    ctx.strokeStyle = 'rgba(144,164,174,0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pad, pad); ctx.lineTo(pad, h - pad); ctx.lineTo(w - pad, h - pad); ctx.stroke();
+
+    // Torque-speed curve
+    ctx.strokeStyle = '#b388ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var s = 0.01; s <= 1; s += 0.01) {
+      var speed = 1 - s;
+      var torque = (2 * 0.1 / s) / ((0.05 + 0.1 / s) * (0.05 + 0.1 / s) + 0.25);
+      var x = pad + speed * gw;
+      var y = h - pad - torque * gh * 1.5;
+      if (s <= 0.02) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Animated operating point
+    var opSlip = 0.03 + 0.02 * Math.sin(t * 0.7);
+    var opSpeed = 1 - opSlip;
+    var opTorque = (2 * 0.1 / opSlip) / ((0.05 + 0.1 / opSlip) * (0.05 + 0.1 / opSlip) + 0.25);
+    var opX = pad + opSpeed * gw;
+    var opY = h - pad - opTorque * gh * 1.5;
+    ctx.fillStyle = '#b388ff';
+    ctx.beginPath(); ctx.arc(opX, opY, 5, 0, 2 * Math.PI); ctx.fill();
+
+    // Labels
+    ctx.font = '10px JetBrains Mono';
+    ctx.fillStyle = '#90a4ae';
+    ctx.fillText('Speed →', w * 0.5, h - 10);
+    ctx.save(); ctx.translate(12, h * 0.5); ctx.rotate(-Math.PI / 2);
+    ctx.fillText('Torque →', 0, 0); ctx.restore();
+  });
+})();
+</script>
+
+</body>
+</html>
