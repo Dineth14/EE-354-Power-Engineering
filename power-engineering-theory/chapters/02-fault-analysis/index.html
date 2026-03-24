@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fault Analysis — Power Engineering Theory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="../../index.html" class="logo">⚡ PET</a>
+    <button class="menu-close" id="menu-close" aria-label="Close menu">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="../../index.html" class="nav-link">Home</a>
+    <div class="nav-section">
+      <button class="nav-section-toggle" aria-expanded="false">Chapters</button>
+      <div class="nav-section-content">
+        <a href="../01-load-flow-analysis/index.html" class="nav-link">01 — Load Flow Analysis</a>
+        <a href="../02-fault-analysis/index.html" class="nav-link active">02 — Fault Analysis</a>
+        <a href="../03-synchronous-machines/index.html" class="nav-link">03 — Synchronous Machines</a>
+        <a href="../04-induction-machines/index.html" class="nav-link">04 — Induction Machines</a>
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ═══════════════════════════ TOPBAR ═══════════════════════════ -->
+<header class="topbar">
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+  <span class="breadcrumb">Power Engineering Theory / <strong>Fault Analysis</strong></span>
+  <button class="theme-toggle" aria-label="Toggle theme">◑</button>
+</header>
+
+<!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
+<main class="content">
+
+  <!-- Hero -->
+  <section class="chapter-hero">
+    <canvas id="ch2-hero-canvas" width="900" height="220"></canvas>
+    <div class="chapter-hero-text">
+      <span class="chapter-label">Chapter 02</span>
+      <h1>Fault Analysis</h1>
+      <p class="chapter-subtitle">Symmetrical components, sequence networks &amp; short-circuit calculations</p>
+    </div>
+  </section>
+
+  <!-- Table of Contents (right rail) -->
+  <nav class="toc" id="toc">
+    <h3>On This Page</h3>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#symmetrical-faults">Symmetrical Faults</a></li>
+      <li><a href="#symmetrical-components">Symmetrical Components</a></li>
+      <li><a href="#sequence-networks">Sequence Networks</a></li>
+      <li><a href="#slg-fault">Single Line-to-Ground Fault</a></li>
+      <li><a href="#ll-fault">Line-to-Line Fault</a></li>
+      <li><a href="#dlg-fault">Double Line-to-Ground Fault</a></li>
+      <li><a href="#zbus-method">Z-Bus Fault Method</a></li>
+      <li><a href="#sim-oscillogram">Sim — Fault Oscillogram</a></li>
+      <li><a href="#sim-seqcomp">Sim — Sequence Components</a></li>
+      <li><a href="#sim-faultcalc">Sim — Network Fault Calculator</a></li>
+      <li><a href="#quick-ref">Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══════════ 1. OVERVIEW ═══════════ -->
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      Short-circuit faults are the most severe disturbances in power systems.
+      Accurate fault analysis is essential for protective relay coordination,
+      circuit breaker rating, and system stability assessment.
+      In this chapter we develop the mathematical framework for analysing
+      <strong>symmetrical</strong> (three-phase) and <strong>unsymmetrical</strong>
+      (SLG, LL, DLG) faults using symmetrical components and the Z-bus method.
+    </p>
+  </section>
+
+  <!-- ═══════════ 2. SYMMETRICAL (3-PHASE) FAULTS ═══════════ -->
+  <section id="symmetrical-faults">
+    <h2>Symmetrical (Three-Phase) Faults</h2>
+    <p>
+      A balanced three-phase fault is the most severe but also the simplest to
+      analyse — only the <strong>positive-sequence network</strong> is involved.
+    </p>
+
+    <div class="equation-box">
+      $$I_f^{(3)} = \frac{V_f}{Z_1^{Th} + Z_f}$$
+    </div>
+
+    <p>
+      where $V_f$ is the pre-fault voltage at the faulted bus (usually 1.0 p.u.),
+      $Z_1^{Th}$ is the positive-sequence Thevenin impedance, and $Z_f$ is the
+      fault impedance (zero for a bolted fault).
+    </p>
+
+    <h3>Transient Fault Current Components</h3>
+    <p>
+      A synchronous generator contributes a time-varying fault current with three
+      distinct periods:
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Subtransient Period (0–3 cycles)</h4>
+          <p>Flux trapped in the damper windings decays with time constant $T''_d$.</p>
+          $$i''(t) = \left(\frac{1}{X''_d} - \frac{1}{X'_d}\right) e^{-t/T''_d}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Transient Period (3–30 cycles)</h4>
+          <p>Field winding flux decays with time constant $T'_d$.</p>
+          $$i'(t) = \left(\frac{1}{X'_d} - \frac{1}{X_d}\right) e^{-t/T'_d}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Steady-State</h4>
+          <p>Only the synchronous reactance limits the current.</p>
+          $$I_{ss} = \frac{V_f}{X_d}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">4</span>
+        <div class="step-content">
+          <h4>DC Offset (Asymmetrical Component)</h4>
+          <p>
+            The worst-case DC offset decays with time constant
+            $T_a = X''_d / (\omega R_a)$:
+          </p>
+          $$i_{dc}(t) = \sqrt{2}\, I'' \, e^{-t/T_a}$$
+          <p>
+            The peak asymmetrical current (first half-cycle) is:
+          </p>
+          $$I_{asym,peak} = \sqrt{2}\, I'' \left(1 + e^{-\pi / (\omega T_a)}\right)$$
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. SYMMETRICAL COMPONENTS ═══════════ -->
+  <section id="symmetrical-components">
+    <h2>Symmetrical Components (Fortescue's Theorem)</h2>
+    <p>
+      Any set of three unbalanced phasors can be decomposed into three balanced
+      sets: <strong>positive-sequence</strong>, <strong>negative-sequence</strong>,
+      and <strong>zero-sequence</strong>.
+    </p>
+
+    <div class="equation-box">
+      $$\begin{bmatrix} V_a \\ V_b \\ V_c \end{bmatrix}
+      = \begin{bmatrix} 1 & 1 & 1 \\ a^2 & a & 1 \\ a & a^2 & 1 \end{bmatrix}
+      \begin{bmatrix} V_1 \\ V_2 \\ V_0 \end{bmatrix}
+      = [A] \begin{bmatrix} V_1 \\ V_2 \\ V_0 \end{bmatrix}$$
+    </div>
+
+    <p>The inverse transformation is:</p>
+
+    <div class="equation-box">
+      $$\begin{bmatrix} V_1 \\ V_2 \\ V_0 \end{bmatrix}
+      = \frac{1}{3} \begin{bmatrix} 1 & a & a^2 \\ 1 & a^2 & a \\ 1 & 1 & 1 \end{bmatrix}
+      \begin{bmatrix} V_a \\ V_b \\ V_c \end{bmatrix}
+      = [A]^{-1} \begin{bmatrix} V_a \\ V_b \\ V_c \end{bmatrix}$$
+    </div>
+
+    <p>
+      where the operator $a = 1\angle 120°= e^{j2\pi/3}$ and
+      $a^2 = 1\angle 240°$,  with the property $1 + a + a^2 = 0$.
+    </p>
+
+    <div class="worked-example">
+      <h4>Worked Example — Decomposing Unbalanced Currents</h4>
+      <p>
+        Given $I_a = 10\angle 0°$, $I_b = 6\angle{-120°}$,
+        $I_c = 8\angle 120°$. Find the sequence components.
+      </p>
+      <p>Applying $[A]^{-1}$:</p>
+      $$I_0 = \tfrac{1}{3}(I_a + I_b + I_c) = \tfrac{1}{3}(10\angle 0° + 6\angle{-120°} + 8\angle 120°)$$
+      $$I_1 = \tfrac{1}{3}(I_a + aI_b + a^2 I_c)$$
+      $$I_2 = \tfrac{1}{3}(I_a + a^2 I_b + aI_c)$$
+      <p>
+        Try the <a href="#sim-seqcomp">Sequence Component Visualizer</a> below
+        to explore this interactively.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. SEQUENCE NETWORKS ═══════════ -->
+  <section id="sequence-networks">
+    <h2>Sequence Networks</h2>
+    <p>
+      Because power system components behave differently for each sequence, we
+      construct three independent networks:
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Positive-Sequence Network</h4>
+          <p>
+            The normal network with generators modelled by their subtransient/transient
+            reactance behind a voltage source $V_f$. Transformers and lines have
+            their normal impedances.
+          </p>
+          $$Z_1^{gen} = jX''_d \quad\text{(subtransient studies)}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Negative-Sequence Network</h4>
+          <p>
+            Same topology as positive-sequence but <strong>no voltage sources</strong>.
+            Generator negative-sequence reactance:
+          </p>
+          $$X_2 \approx \frac{X''_d + X''_q}{2}$$
+          <p>
+            For round-rotor machines $X_2 \approx X''_d$. Transmission line
+            impedances are the same as positive-sequence.
+          </p>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Zero-Sequence Network</h4>
+          <p>
+            Depends critically on transformer winding connections and grounding.
+            Zero-sequence current flows only through grounded paths.
+          </p>
+          $$Z_0^{line} \approx 2\text{–}3.5 \times Z_1^{line}$$
+          <p>
+            Delta-connected transformer windings block zero-sequence current;
+            grounded-wye connections allow it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. SLG FAULT ═══════════ -->
+  <section id="slg-fault">
+    <h2>Single Line-to-Ground (SLG) Fault</h2>
+    <p>
+      The most common fault type (~80 % of faults). Fault on phase <em>a</em>
+      to ground through impedance $Z_f$:
+    </p>
+
+    <p><strong>Boundary conditions:</strong></p>
+    <ul>
+      <li>$I_b = 0,\; I_c = 0$</li>
+      <li>$V_a = Z_f \cdot I_a$</li>
+    </ul>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Sequence Currents Are Equal</h4>
+          <p>From $I_b = I_c = 0$:</p>
+          $$I_a^{(1)} = I_a^{(2)} = I_a^{(0)} = \frac{I_a}{3}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Sequence Network Connection</h4>
+          <p>All three sequence networks connected <strong>in series</strong>:</p>
+          <div class="equation-box">
+            $$I_a^{(1)} = \frac{V_f}{Z_1 + Z_2 + Z_0 + 3Z_f}$$
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Phase Fault Current</h4>
+          $$I_a = 3I_a^{(1)} = \frac{3V_f}{Z_1 + Z_2 + Z_0 + 3Z_f}$$
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. LL FAULT ═══════════ -->
+  <section id="ll-fault">
+    <h2>Line-to-Line (LL) Fault</h2>
+    <p>
+      Fault between phases <em>b</em> and <em>c</em> through impedance $Z_f$:
+    </p>
+
+    <p><strong>Boundary conditions:</strong></p>
+    <ul>
+      <li>$I_a = 0$</li>
+      <li>$I_b = -I_c$</li>
+      <li>$V_b - V_c = Z_f \cdot I_b$</li>
+    </ul>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Sequence Currents</h4>
+          <p>No zero-sequence flows (no ground path):</p>
+          $$I_a^{(0)} = 0, \quad I_a^{(1)} = -I_a^{(2)}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Positive and Negative Networks in Parallel</h4>
+          <div class="equation-box">
+            $$I_a^{(1)} = \frac{V_f}{Z_1 + Z_2 + Z_f}$$
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Phase Fault Current</h4>
+          $$I_b = -I_c = (a^2 - a)\, I_a^{(1)} = -j\sqrt{3}\, I_a^{(1)}$$
+          <p>
+            When $Z_1 = Z_2$ (common for lines), $\displaystyle |I_b| = \frac{\sqrt{3}\, V_f}{2Z_1 + Z_f}$.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. DLG FAULT ═══════════ -->
+  <section id="dlg-fault">
+    <h2>Double Line-to-Ground (DLG) Fault</h2>
+    <p>
+      Phases <em>b</em> and <em>c</em> to ground through $Z_f$:
+    </p>
+
+    <p><strong>Boundary conditions:</strong></p>
+    <ul>
+      <li>$I_a = 0$</li>
+      <li>$V_b = V_c = Z_f (I_b + I_c)$</li>
+    </ul>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Positive-Sequence Current</h4>
+          $$I_a^{(1)} = \frac{V_f}{Z_1 + \dfrac{Z_2 (Z_0 + 3Z_f)}{Z_2 + Z_0 + 3Z_f}}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Current Divider for Zero- and Negative-Sequence</h4>
+          $$I_a^{(2)} = -I_a^{(1)} \cdot \frac{Z_0 + 3Z_f}{Z_2 + Z_0 + 3Z_f}$$
+          $$I_a^{(0)} = -I_a^{(1)} \cdot \frac{Z_2}{Z_2 + Z_0 + 3Z_f}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Sequence Network Connection</h4>
+          <p>Negative- and zero-sequence networks connected <strong>in parallel</strong>,
+          then in series with positive-sequence.</p>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">4</span>
+        <div class="step-content">
+          <h4>Ground Fault Current</h4>
+          $$I_f = I_b + I_c = 3I_a^{(0)}$$
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. Z-BUS METHOD ═══════════ -->
+  <section id="zbus-method">
+    <h2>Z-Bus Fault Analysis Method</h2>
+    <p>
+      For large networks, we form the bus impedance matrix $[Z_{bus}]$ for each
+      sequence and extract Thevenin impedances directly:
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Form $[Y_{bus}]$ for Each Sequence</h4>
+          <p>Build the bus admittance matrix using element impedances for
+          positive, negative, and zero sequence.</p>
+          $$[Z_{bus}^{(k)}] = [Y_{bus}^{(k)}]^{-1} \quad k \in \{1, 2, 0\}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Thevenin Impedance at Fault Bus</h4>
+          <p>The diagonal element $Z_{ff}^{(k)}$ is the Thevenin impedance at bus $f$.</p>
+          $$Z_k^{Th} = Z_{ff}^{(k)}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Bus Voltages During Fault</h4>
+          <p>For a 3-phase fault at bus $f$:</p>
+          <div class="equation-box">
+            $$V_i^{(1)} = V_f^{pre} - Z_{if}^{(1)} \cdot I_f^{(1)}$$
+          </div>
+          <p>This gives voltage depression at every bus — critical for relay coordination.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 1 — FAULT OSCILLOGRAM ═══════════ -->
+  <section id="sim-oscillogram" class="sim-section">
+    <h2>Simulation — Fault Current Oscillogram</h2>
+    <p>
+      Visualise the transient fault current from a synchronous generator.
+      Adjust machine reactances and time constants to see how the subtransient,
+      transient, and steady-state envelopes evolve. The DC offset component is
+      shown separately.
+    </p>
+    <div class="sim-container" id="sym-fault-sim">
+      <div class="sim-header">
+        <h3>Fault Current Waveform</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 2 — SEQUENCE COMPONENTS ═══════════ -->
+  <section id="sim-seqcomp" class="sim-section">
+    <h2>Simulation — Symmetrical Component Visualizer</h2>
+    <p>
+      Drag the tips of the three phase phasors (or use the sliders) to create
+      any unbalanced set. The positive-, negative-, and zero-sequence decomposition
+      updates in real time.
+    </p>
+    <div class="sim-container" id="seq-comp-sim">
+      <div class="sim-header">
+        <h3>Sequence Component Decomposition</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 3 — NETWORK FAULT CALCULATOR ═══════════ -->
+  <section id="sim-faultcalc" class="sim-section">
+    <h2>Simulation — Network Fault Calculator</h2>
+    <p>
+      A 4-bus network with two generators. Click any bus to apply a fault,
+      choose the fault type (3Φ, SLG, LL, DLG), and observe how fault currents
+      and bus voltages change. Voltage depression bars show the severity at each
+      bus. The Z-bus method is used internally for all calculations.
+    </p>
+    <div class="sim-container" id="fault-calc-sim">
+      <div class="sim-header">
+        <h3>Network Fault Calculator</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REFERENCE ═══════════ -->
+  <section id="quick-ref">
+    <h2>Quick Reference</h2>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>3-Phase Fault</h4>
+        <p class="math-highlight">$I_f = \dfrac{V_f}{Z_1 + Z_f}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>SLG Fault</h4>
+        <p class="math-highlight">$I_a^{(1)} = \dfrac{V_f}{Z_1 + Z_2 + Z_0 + 3Z_f}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>LL Fault</h4>
+        <p class="math-highlight">$I_a^{(1)} = \dfrac{V_f}{Z_1 + Z_2 + Z_f}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>DLG Fault</h4>
+        <p class="math-highlight">$I_a^{(1)} = \dfrac{V_f}{Z_1 + Z_2 \| (Z_0 + 3Z_f)}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Fortescue Transform</h4>
+        <p class="math-highlight">$[A] = \begin{bmatrix}1&1&1\\a^2&a&1\\a&a^2&1\end{bmatrix}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Operator Identity</h4>
+        <p class="math-highlight">$1 + a + a^2 = 0$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Asymmetrical Peak</h4>
+        <p class="math-highlight">$I_{pk} = \sqrt{2}\, I''\left(1 + e^{-\pi/\omega T_a}\right)$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Z-Bus Voltage</h4>
+        <p class="math-highlight">$V_i = V_f - Z_{if} \cdot I_f$</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="sim/symmetrical-fault.js"></script>
+<script src="sim/sequence-networks.js"></script>
+<script src="sim/fault-current.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  SymmetricalFaultSim.create('sym-fault-sim');
+  SequenceNetworkSim.create('seq-comp-sim');
+  FaultCurrentSim.create('fault-calc-sim');
+
+  /* Hero animation — lightning / fault flash effect */
+  var hc = document.getElementById('ch2-hero-canvas');
+  if (hc) {
+    var hctx = PET.setupCanvas(hc, 900, 220);
+    var t = 0;
+    function drawHero() {
+      hctx.clearRect(0, 0, 900, 220);
+      PET.drawGrid(hctx, 900, 220, 30, 'rgba(38,48,70,0.18)');
+
+      /* tower / line representation */
+      hctx.strokeStyle = 'rgba(64,196,255,0.3)'; hctx.lineWidth = 2;
+      for (var i = 0; i < 5; i++) {
+        var x = 100 + i * 175;
+        hctx.beginPath();
+        hctx.moveTo(x, 180); hctx.lineTo(x, 60);
+        hctx.moveTo(x - 30, 80); hctx.lineTo(x + 30, 80);
+        hctx.moveTo(x - 20, 100); hctx.lineTo(x + 20, 100);
+        hctx.stroke();
+      }
+
+      /* conductors */
+      for (var j = 0; j < 4; j++) {
+        hctx.strokeStyle = 'rgba(64,196,255,0.2)'; hctx.lineWidth = 1.5;
+        hctx.beginPath();
+        hctx.moveTo(100 + j * 175, 80);
+        hctx.lineTo(275 + j * 175, 80);
+        hctx.stroke();
+      }
+
+      /* fault flash */
+      var flashBus = Math.floor(t / 80) % 5;
+      var flashPhase = (t % 80) / 80;
+      if (flashPhase < 0.3) {
+        var fx = 100 + flashBus * 175;
+        hctx.fillStyle = 'rgba(255,82,82,' + (0.6 - flashPhase * 2) + ')';
+        hctx.beginPath(); hctx.arc(fx, 80, 30 + flashPhase * 40, 0, 2 * Math.PI); hctx.fill();
+
+        /* lightning bolt */
+        hctx.strokeStyle = '#ffca28'; hctx.lineWidth = 2;
+        hctx.beginPath();
+        hctx.moveTo(fx, 20); hctx.lineTo(fx - 8, 55);
+        hctx.lineTo(fx + 5, 55); hctx.lineTo(fx - 5, 85);
+        hctx.stroke();
+      }
+
+      t++;
+      requestAnimationFrame(drawHero);
+    }
+    drawHero();
+  }
+
+  /* KaTeX auto-render */
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ]
+    });
+  }
+});
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+</body>
+</html>
