@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Induction Machines — Power Engineering Theory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="../../index.html" class="logo">⚡ PET</a>
+    <button class="menu-close" id="menu-close" aria-label="Close menu">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="../../index.html" class="nav-link">Home</a>
+    <div class="nav-section">
+      <button class="nav-section-toggle" aria-expanded="false">Chapters</button>
+      <div class="nav-section-content">
+        <a href="../01-load-flow-analysis/index.html" class="nav-link">01 — Load Flow Analysis</a>
+        <a href="../02-fault-analysis/index.html" class="nav-link">02 — Fault Analysis</a>
+        <a href="../03-synchronous-machines/index.html" class="nav-link">03 — Synchronous Machines</a>
+        <a href="../04-induction-machines/index.html" class="nav-link active">04 — Induction Machines</a>
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ═══════════════════════════ TOPBAR ═══════════════════════════ -->
+<header class="topbar">
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+  <span class="breadcrumb">Power Engineering Theory / <strong>Induction Machines</strong></span>
+  <button class="theme-toggle" aria-label="Toggle theme">◑</button>
+</header>
+
+<!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
+<main class="content">
+
+  <!-- Hero -->
+  <section class="chapter-hero">
+    <canvas id="ch4-hero-canvas" width="900" height="220"></canvas>
+    <div class="chapter-hero-text">
+      <span class="chapter-label">Chapter 04</span>
+      <h1>Induction Machines</h1>
+      <p class="chapter-subtitle">Equivalent circuit, torque-speed curves &amp; speed control</p>
+    </div>
+  </section>
+
+  <!-- TOC -->
+  <nav class="toc" id="toc">
+    <h3>On This Page</h3>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#equiv-circuit">Equivalent Circuit</a></li>
+      <li><a href="#slip">Slip &amp; Speed</a></li>
+      <li><a href="#torque">Torque Equation</a></li>
+      <li><a href="#torque-speed">Torque-Speed Characteristic</a></li>
+      <li><a href="#rotor-resistance">Rotor Resistance Effects</a></li>
+      <li><a href="#starting">Starting Methods</a></li>
+      <li><a href="#speed-control">Speed Control (V/f &amp; VFD)</a></li>
+      <li><a href="#induction-gen">Induction Generator</a></li>
+      <li><a href="#sim-equiv">Sim — Equivalent Circuit</a></li>
+      <li><a href="#sim-torque">Sim — Torque-Speed Curve</a></li>
+      <li><a href="#sim-slip">Sim — Slip-Power &amp; V/f Control</a></li>
+      <li><a href="#quick-ref">Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══════════ 1. OVERVIEW ═══════════ -->
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      The three-phase induction motor is the most widely used electric machine
+      in industry. Its rugged construction and self-starting capability make it
+      the default choice for most motor applications. Understanding its
+      equivalent circuit, torque production, and speed control methods is essential
+      for power engineers.
+    </p>
+  </section>
+
+  <!-- ═══════════ 2. EQUIVALENT CIRCUIT ═══════════ -->
+  <section id="equiv-circuit">
+    <h2>Per-Phase Equivalent Circuit</h2>
+    <p>
+      The IEEE-recommended per-phase equivalent circuit (referred to the stator):
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Stator Branch</h4>
+          <p>Series connection of stator resistance $R_1$ and leakage reactance $X_1$.</p>
+          $$Z_1 = R_1 + jX_1$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Magnetising Branch</h4>
+          <p>Shunt branch representing core losses ($R_c$) and magnetising reactance ($X_m$).</p>
+          $$Z_m = jX_m \quad \text{(simplified, neglecting } R_c\text{)}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Rotor Branch (Referred to Stator)</h4>
+          <p>The slip-dependent rotor impedance:</p>
+          <div class="equation-box">
+            $$Z_2 = \frac{R_2}{s} + jX_2 = R_2 + jX_2 + R_2\,\frac{1-s}{s}$$
+          </div>
+          <p>
+            where $R_2/s$ is the total rotor impedance and
+            $R_2(1-s)/s$ represents mechanical power conversion.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. SLIP ═══════════ -->
+  <section id="slip">
+    <h2>Slip &amp; Speed Relations</h2>
+
+    <div class="equation-box">
+      $$n_s = \frac{120 f}{p} \quad \text{(synchronous speed, rpm)}$$
+    </div>
+    <div class="equation-box">
+      $$s = \frac{n_s - n_r}{n_s} = \frac{\omega_s - \omega_r}{\omega_s}$$
+    </div>
+    <p>where $p$ is the number of poles, $f$ is the supply frequency, and
+    $n_r$ is the rotor speed.</p>
+
+    <table>
+      <thead><tr><th>Condition</th><th>Slip Range</th><th>Mode</th></tr></thead>
+      <tbody>
+        <tr><td>$n_r = 0$</td><td>$s = 1$</td><td>Starting / Blocked rotor</td></tr>
+        <tr><td>$0 < n_r < n_s$</td><td>$0 < s < 1$</td><td>Motoring</td></tr>
+        <tr><td>$n_r = n_s$</td><td>$s = 0$</td><td>No load (ideal)</td></tr>
+        <tr><td>$n_r > n_s$</td><td>$s < 0$</td><td>Generating</td></tr>
+        <tr><td>$n_r < 0$</td><td>$s > 1$</td><td>Braking (plugging)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════ 4. TORQUE EQUATION ═══════════ -->
+  <section id="torque">
+    <h2>Torque Equation</h2>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Air-Gap Power</h4>
+          <p>Power transferred across the air gap (per phase):</p>
+          $$P_{ag} = I_2^2 \cdot \frac{R_2}{s}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Electromagnetic Torque</h4>
+          $$T_e = \frac{3 P_{ag}}{\omega_s} = \frac{3}{\omega_s} \cdot \frac{V_{th}^2 (R_2/s)}{(R_{th} + R_2/s)^2 + (X_{th} + X_2)^2}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Maximum (Pull-Out) Torque</h4>
+          <p>Setting $dT/ds = 0$:</p>
+          <div class="equation-box">
+            $$T_{max} = \frac{3V_{th}^2}{2\omega_s\left(R_{th} + \sqrt{R_{th}^2 + (X_{th}+X_2)^2}\right)}$$
+          </div>
+          <p>at slip:</p>
+          <div class="equation-box">
+            $$s_{max} = \frac{R_2}{\sqrt{R_{th}^2 + (X_{th}+X_2)^2}}$$
+          </div>
+          <p>Note: $T_{max}$ is independent of $R_2$ — changing rotor resistance
+          only shifts the slip at which maximum torque occurs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. TORQUE-SPEED CHARACTERISTIC ═══════════ -->
+  <section id="torque-speed">
+    <h2>Torque-Speed Characteristic</h2>
+    <p>The T-n curve has three distinct regions:</p>
+    <ul>
+      <li><strong>Low-slip region</strong> ($s \ll s_{max}$): torque approximately
+      proportional to slip — near-linear behaviour</li>
+      <li><strong>Pull-out point</strong> ($s = s_{max}$): maximum torque — safe
+      operating limit</li>
+      <li><strong>High-slip region</strong> ($s > s_{max}$): torque decreases —
+      unstable operation, motor stalls</li>
+    </ul>
+
+    <div class="worked-example">
+      <h4>Worked Example — Motor Operating Point</h4>
+      <p>
+        A 3-phase, 4-pole, 50 Hz induction motor has $R_2 = 0.02$ pu and
+        $X_1 + X_2 = 0.12$ pu. Find the slip at maximum torque.
+      </p>
+      $$s_{max} = \frac{R_2}{\sqrt{R_1^2 + (X_1 + X_2)^2}}
+               \approx \frac{0.02}{0.12} = 0.167$$
+      <p>Speed at max torque: $n_r = n_s(1 - s_{max}) = 1500(1 - 0.167) = 1250$ rpm</p>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. ROTOR RESISTANCE ═══════════ -->
+  <section id="rotor-resistance">
+    <h2>Effect of Rotor Resistance</h2>
+    <p>
+      Increasing external rotor resistance (wound-rotor machines):
+    </p>
+    <ul>
+      <li>Shifts $T_{max}$ to higher slip (lower speed)</li>
+      <li>Does <strong>not</strong> change the magnitude of $T_{max}$</li>
+      <li>Increases starting torque (up to $T_{max}$ when $s_{max} = 1$)</li>
+      <li>Reduces efficiency at rated speed</li>
+    </ul>
+    <p>
+      The condition for maximum starting torque: $R_2 + R_{ext} = \sqrt{R_1^2 + (X_1+X_2)^2}$
+    </p>
+  </section>
+
+  <!-- ═══════════ 7. STARTING METHODS ═══════════ -->
+  <section id="starting">
+    <h2>Starting Methods</h2>
+    <table>
+      <thead><tr><th>Method</th><th>Starting Current</th><th>Starting Torque</th><th>Application</th></tr></thead>
+      <tbody>
+        <tr><td>Direct-on-Line (DOL)</td><td>$6\text{–}8 \times I_{rated}$</td><td>Full</td><td>Small motors (&lt; 10 kW)</td></tr>
+        <tr><td>Star-Delta</td><td>$\frac{1}{3} \times$ DOL</td><td>$\frac{1}{3} \times$ DOL</td><td>Low-torque starting</td></tr>
+        <tr><td>Auto-transformer</td><td>$x^2 \times$ DOL</td><td>$x^2 \times$ DOL</td><td>Medium voltage</td></tr>
+        <tr><td>Soft starter</td><td>Variable</td><td>Variable</td><td>General purpose</td></tr>
+        <tr><td>VFD (Variable freq.)</td><td>Rated</td><td>Full or more</td><td>Best overall</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════ 8. SPEED CONTROL ═══════════ -->
+  <section id="speed-control">
+    <h2>Speed Control — V/f and VFD</h2>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Constant V/f Principle</h4>
+          <p>
+            Maintaining $V/f = \text{constant}$ keeps the air-gap flux constant,
+            preserving torque capability:
+          </p>
+          $$\Phi \propto \frac{V}{f} = \text{constant}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Below Base Speed</h4>
+          <p>
+            Constant torque region: reduce both $V$ and $f$ proportionally.
+            $n_s = 120f/p$ decreases, but full torque is available.
+          </p>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Above Base Speed (Field Weakening)</h4>
+          <p>
+            $V$ cannot exceed rated; increase $f$ alone. Flux decreases,
+            giving constant power operation:
+          </p>
+          $$T \propto \frac{1}{f^2}, \quad P \propto \frac{1}{f}$$
+        </div>
+      </div>
+    </div>
+
+    <h3>Slip-Power Recovery (Doubly-Fed)</h3>
+    <p>
+      In wound-rotor machines, the slip power $sP_{ag}$ normally dissipated in
+      rotor resistance can be recovered and fed back to the supply through a
+      converter, significantly improving efficiency at reduced speeds.
+    </p>
+  </section>
+
+  <!-- ═══════════ 9. INDUCTION GENERATOR ═══════════ -->
+  <section id="induction-gen">
+    <h2>Induction Generator</h2>
+    <p>
+      When driven above synchronous speed ($s < 0$), the induction machine
+      generates power. The torque becomes negative (braking mechanical input).
+    </p>
+    <ul>
+      <li>Requires reactive power from the grid (or capacitor bank) for excitation</li>
+      <li>Self-excited induction generator (SEIG): uses capacitors across terminals</li>
+      <li>Common in wind turbines (Type 1 &amp; Type 2 wind generators)</li>
+    </ul>
+    <div class="equation-box">
+      $$P_{gen} = P_{ag}(1 - s) = P_{ag}|s| \cdot \frac{1-s}{|s|} \quad (s < 0)$$
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 1 — EQUIVALENT CIRCUIT ═══════════ -->
+  <section id="sim-equiv" class="sim-section">
+    <h2>Simulation — Equivalent Circuit Analyser</h2>
+    <p>
+      Adjust the equivalent circuit parameters and slip to see how currents,
+      powers, and efficiency change. The power flow breakdown shows stator
+      input, air-gap power, rotor losses, and mechanical output.
+    </p>
+    <div class="sim-container" id="equiv-circuit-sim">
+      <div class="sim-header">
+        <h3>Per-Phase Equivalent Circuit</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 2 — TORQUE-SPEED ═══════════ -->
+  <section id="sim-torque" class="sim-section">
+    <h2>Simulation — Torque-Speed Characteristic</h2>
+    <p>
+      Explore the torque-speed curve across all operating regions — motoring,
+      generating, and braking. Toggle <strong>Show R2 family</strong> to see
+      how external rotor resistance shifts the pull-out point without changing
+      its magnitude.
+    </p>
+    <div class="sim-container" id="torque-speed-sim">
+      <div class="sim-header">
+        <h3>Torque-Speed Curve</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 3 — SLIP-POWER & V/f ═══════════ -->
+  <section id="sim-slip" class="sim-section">
+    <h2>Simulation — Slip-Power Flow &amp; V/f Control</h2>
+    <p>
+      Switch between two modes: <strong>Slip-Power Flow</strong> shows how
+      power divides at a given slip (with recovery path), and
+      <strong>V/f Control</strong> displays the family of torque-speed curves
+      at different supply frequencies.
+    </p>
+    <div class="sim-container" id="slip-power-sim">
+      <div class="sim-header">
+        <h3>Slip-Power &amp; Speed Control</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REFERENCE ═══════════ -->
+  <section id="quick-ref">
+    <h2>Quick Reference</h2>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>Synchronous Speed</h4>
+        <p class="math-highlight">$n_s = \dfrac{120f}{p}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Slip</h4>
+        <p class="math-highlight">$s = \dfrac{n_s - n_r}{n_s}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Rotor Impedance</h4>
+        <p class="math-highlight">$Z_2 = \dfrac{R_2}{s} + jX_2$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Air-Gap Power</h4>
+        <p class="math-highlight">$P_{ag} = 3I_2^2 \dfrac{R_2}{s}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Mechanical Power</h4>
+        <p class="math-highlight">$P_{mech} = (1-s)\, P_{ag}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Pull-Out Slip</h4>
+        <p class="math-highlight">$s_{max} = \dfrac{R_2}{\sqrt{R_{th}^2 + X_{eq}^2}}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Maximum Torque</h4>
+        <p class="math-highlight">$T_{max} = \dfrac{3V_{th}^2}{2\omega_s(R_{th} + Z_{eq})}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>V/f Control</h4>
+        <p class="math-highlight">$\Phi \propto V/f = \text{const}$</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="sim/equivalent-circuit.js"></script>
+<script src="sim/torque-speed.js"></script>
+<script src="sim/slip-power.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  EquivCircuitSim.create('equiv-circuit-sim');
+  TorqueSpeedSim.create('torque-speed-sim');
+  SlipPowerSim.create('slip-power-sim');
+
+  /* Hero — torque-speed curve animation */
+  var hc = document.getElementById('ch4-hero-canvas');
+  if (hc) {
+    var hctx = PET.setupCanvas(hc, 900, 220);
+    var t = 0;
+    function drawHero() {
+      hctx.clearRect(0, 0, 900, 220);
+      PET.drawGrid(hctx, 900, 220, 30, 'rgba(38,48,70,0.18)');
+
+      /* Simplified T-n curve */
+      var ox = 150, oy = 180, pw = 600, ph = 140;
+      hctx.strokeStyle = 'rgba(236,239,241,0.15)'; hctx.lineWidth = 1;
+      hctx.beginPath(); hctx.moveTo(ox, oy); hctx.lineTo(ox + pw, oy); hctx.stroke();
+      hctx.beginPath(); hctx.moveTo(ox, oy - ph); hctx.lineTo(ox, oy + 10); hctx.stroke();
+
+      hctx.strokeStyle = '#00e676'; hctx.lineWidth = 2.5;
+      hctx.beginPath();
+      for (var n = 0; n <= 1; n += 0.005) {
+        var s = 1 - n; if (s < 0.001) s = 0.001;
+        var T = 1.0 * (0.02 / s) / ((0.03 + 0.02 / s) * (0.03 + 0.02 / s) + 0.12 * 0.12);
+        T = Math.min(T, 2);
+        var px = ox + n * pw;
+        var py = oy - T / 2 * ph;
+        if (n === 0) hctx.moveTo(px, py); else hctx.lineTo(px, py);
+      }
+      hctx.stroke();
+
+      /* Animated operating point */
+      var opN = 0.97 + 0.02 * Math.sin(t * 0.03);
+      var opS = 1 - opN; if (opS < 0.001) opS = 0.001;
+      var opT = 1.0 * (0.02 / opS) / ((0.03 + 0.02 / opS) * (0.03 + 0.02 / opS) + 0.12 * 0.12);
+      opT = Math.min(opT, 2);
+      var opX = ox + opN * pw;
+      var opY = oy - opT / 2 * ph;
+      hctx.fillStyle = '#ffca28';
+      hctx.beginPath(); hctx.arc(opX, opY, 6, 0, 2 * Math.PI); hctx.fill();
+
+      /* spinning rotor icon */
+      var rx = 80, ry = 110, rr = 30;
+      hctx.strokeStyle = 'rgba(64,196,255,0.3)'; hctx.lineWidth = 2;
+      hctx.beginPath(); hctx.arc(rx, ry, rr, 0, 2 * Math.PI); hctx.stroke();
+      for (var b = 0; b < 6; b++) {
+        var ba = t * 0.05 + b * Math.PI / 3;
+        hctx.strokeStyle = b % 2 === 0 ? '#40c4ff' : '#00e676'; hctx.lineWidth = 3;
+        hctx.beginPath();
+        hctx.moveTo(rx + 8 * Math.cos(ba), ry + 8 * Math.sin(ba));
+        hctx.lineTo(rx + 25 * Math.cos(ba), ry + 25 * Math.sin(ba));
+        hctx.stroke();
+      }
+
+      t++;
+      requestAnimationFrame(drawHero);
+    }
+    drawHero();
+  }
+
+  /* KaTeX auto-render */
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ]
+    });
+  }
+});
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+</body>
+</html>

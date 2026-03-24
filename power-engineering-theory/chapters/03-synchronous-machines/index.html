@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synchronous Machines — Power Engineering Theory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="../../assets/css/main.css">
+<link rel="stylesheet" href="../../assets/css/math.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="../../index.html" class="logo">⚡ PET</a>
+    <button class="menu-close" id="menu-close" aria-label="Close menu">✕</button>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="../../index.html" class="nav-link">Home</a>
+    <div class="nav-section">
+      <button class="nav-section-toggle" aria-expanded="false">Chapters</button>
+      <div class="nav-section-content">
+        <a href="../01-load-flow-analysis/index.html" class="nav-link">01 — Load Flow Analysis</a>
+        <a href="../02-fault-analysis/index.html" class="nav-link">02 — Fault Analysis</a>
+        <a href="../03-synchronous-machines/index.html" class="nav-link active">03 — Synchronous Machines</a>
+        <a href="../04-induction-machines/index.html" class="nav-link">04 — Induction Machines</a>
+      </div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ═══════════════════════════ TOPBAR ═══════════════════════════ -->
+<header class="topbar">
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+  <span class="breadcrumb">Power Engineering Theory / <strong>Synchronous Machines</strong></span>
+  <button class="theme-toggle" aria-label="Toggle theme">◑</button>
+</header>
+
+<!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
+<main class="content">
+
+  <!-- Hero -->
+  <section class="chapter-hero">
+    <canvas id="ch3-hero-canvas" width="900" height="220"></canvas>
+    <div class="chapter-hero-text">
+      <span class="chapter-label">Chapter 03</span>
+      <h1>Synchronous Machines</h1>
+      <p class="chapter-subtitle">Phasor diagrams, power-angle curves &amp; transient stability</p>
+    </div>
+  </section>
+
+  <!-- TOC -->
+  <nav class="toc" id="toc">
+    <h3>On This Page</h3>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#equiv-circuit">Equivalent Circuit</a></li>
+      <li><a href="#phasor-relations">Phasor Relations</a></li>
+      <li><a href="#power-equations">Power Equations</a></li>
+      <li><a href="#salient-pole">Salient-Pole Theory</a></li>
+      <li><a href="#capability-curve">Capability Curve</a></li>
+      <li><a href="#swing-equation">Swing Equation</a></li>
+      <li><a href="#equal-area">Equal-Area Criterion</a></li>
+      <li><a href="#sim-phasor">Sim — Phasor Diagram</a></li>
+      <li><a href="#sim-power-angle">Sim — Power-Angle Curve</a></li>
+      <li><a href="#sim-salient">Sim — Salient-Pole Explorer</a></li>
+      <li><a href="#quick-ref">Quick Reference</a></li>
+    </ol>
+  </nav>
+
+  <!-- ═══════════ 1. OVERVIEW ═══════════ -->
+  <section id="overview">
+    <h2>Overview</h2>
+    <p>
+      The synchronous machine is the workhorse of electric power generation.
+      Understanding its steady-state phasor diagram, the power-angle
+      relationship, and transient stability via the swing equation is fundamental
+      to power system operation.
+    </p>
+  </section>
+
+  <!-- ═══════════ 2. EQUIVALENT CIRCUIT ═══════════ -->
+  <section id="equiv-circuit">
+    <h2>Equivalent Circuit</h2>
+    <p>
+      The per-phase equivalent circuit of a round-rotor synchronous machine
+      consists of the internal EMF $E_f$ behind the synchronous impedance:
+    </p>
+    <div class="equation-box">
+      $$E_f = V_t + I_a (R_a + jX_s)$$
+    </div>
+    <p>
+      where $V_t$ is the terminal voltage, $I_a$ is the armature current,
+      $R_a$ is the armature resistance (often neglected), and $X_s$ is the
+      synchronous reactance.
+    </p>
+
+    <h3>Machine Reactances</h3>
+    <table>
+      <thead><tr><th>Parameter</th><th>Symbol</th><th>Typical Range (pu)</th><th>Application</th></tr></thead>
+      <tbody>
+        <tr><td>Synchronous reactance</td><td>$X_d$</td><td>1.0 – 2.0</td><td>Steady-state analysis</td></tr>
+        <tr><td>Transient reactance</td><td>$X'_d$</td><td>0.2 – 0.4</td><td>Stability studies</td></tr>
+        <tr><td>Subtransient reactance</td><td>$X''_d$</td><td>0.1 – 0.3</td><td>Fault current calculation</td></tr>
+        <tr><td>Negative-sequence</td><td>$X_2$</td><td>≈ $X''_d$</td><td>Unbalanced faults</td></tr>
+        <tr><td>Zero-sequence</td><td>$X_0$</td><td>0.02 – 0.2</td><td>Ground faults</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ═══════════ 3. PHASOR RELATIONS ═══════════ -->
+  <section id="phasor-relations">
+    <h2>Phasor Diagram Relations</h2>
+    <p>
+      Taking $V_t$ as the reference phasor on the real axis and neglecting $R_a$:
+    </p>
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Generator Mode ($E_f$ leads $V_t$)</h4>
+          <p>
+            The machine delivers power to the grid. The power angle $\delta > 0$.
+          </p>
+          $$E_f = V_t + jX_s I_a$$
+          <p>The current lags the terminal voltage by angle $\phi$.</p>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Motor Mode ($E_f$ lags $V_t$)</h4>
+          <p>
+            The machine absorbs power from the grid. $\delta < 0$.
+          </p>
+          $$V_t = E_f + jX_s I_a$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Over- and Under-Excitation</h4>
+          <p>
+            <strong>Over-excited</strong> ($|E_f| > |V_t|$): supplies reactive
+            power (lagging current). <strong>Under-excited</strong>
+            ($|E_f| < |V_t|$): absorbs reactive power (leading current).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. POWER EQUATIONS ═══════════ -->
+  <section id="power-equations">
+    <h2>Power Equations (Round Rotor)</h2>
+    <p>
+      For a round-rotor machine with $R_a = 0$ and $X_s = X_d$:
+    </p>
+    <div class="equation-box">
+      $$P = \frac{E_f V_t}{X_s} \sin\delta$$
+    </div>
+    <div class="equation-box">
+      $$Q = \frac{V_t}{X_s}\left(E_f \cos\delta - V_t\right)$$
+    </div>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Complex Power Derivation</h4>
+          $$S = V_t I_a^* = V_t \left(\frac{E_f \angle\delta - V_t}{jX_s}\right)^*$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Separate Real and Imaginary Parts</h4>
+          $$I_a = \frac{E_f(\cos\delta + j\sin\delta) - V_t}{jX_s}
+                = \frac{E_f\sin\delta}{X_s} - j\frac{E_f\cos\delta - V_t}{X_s}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Maximum Power</h4>
+          <p>
+            Maximum power transfer occurs at $\delta = 90°$:
+          </p>
+          $$P_{max} = \frac{E_f V_t}{X_s}$$
+          <p>
+            Beyond $\delta = 90°$ the machine loses synchronism (pulls out of step).
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. SALIENT-POLE THEORY ═══════════ -->
+  <section id="salient-pole">
+    <h2>Salient-Pole (Two-Reaction) Theory</h2>
+    <p>
+      Salient-pole machines have different reluctance in the <em>d</em>- and
+      <em>q</em>-axes, giving rise to a reluctance torque component.
+    </p>
+    <div class="equation-box">
+      $$P = \underbrace{\frac{E_f V_t}{X_d}\sin\delta}_{\text{excitation torque}}
+          + \underbrace{\frac{V_t^2}{2}\left(\frac{1}{X_q} - \frac{1}{X_d}\right)\sin 2\delta}_{\text{reluctance torque}}$$
+    </div>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Current Decomposition</h4>
+          <p>Armature current decomposed into $d$- and $q$-axis components:</p>
+          $$I_d = \frac{E_f - V_t\cos\delta}{X_d}, \quad I_q = \frac{V_t\sin\delta}{X_q}$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Voltage Equations</h4>
+          $$V_d = E_f - X_d I_d, \quad V_q = X_q I_q$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Power Expression</h4>
+          $$P = V_d I_d + V_q I_q$$
+          <p>Substituting and simplifying yields the two-term power equation above.
+          The reluctance torque peak occurs at $\delta = 45°$ and shifts the
+          total power peak below 90°.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. CAPABILITY CURVE ═══════════ -->
+  <section id="capability-curve">
+    <h2>Generator Capability Curve</h2>
+    <p>
+      The operating region of a synchronous generator is bounded by:
+    </p>
+    <ul>
+      <li><strong>Stator heating limit</strong>: $\sqrt{P^2 + Q^2} \leq S_{rated}$ (circle centred at origin)</li>
+      <li><strong>Rotor heating limit</strong>: $\sqrt{P^2 + (Q + V_t^2/X_s)^2} \leq E_f V_t / X_s$ (circle centred below Q-axis)</li>
+      <li><strong>Stability limit</strong>: $P \leq P_{max}$ (vertical line or $\delta = 90°$ curve)</li>
+      <li><strong>Under-excitation limit</strong>: Minimum excitation for practical end-region heating</li>
+    </ul>
+    <div class="equation-box">
+      $$\text{Stator limit: } P^2 + Q^2 = (V_t I_{a,rated})^2$$
+    </div>
+    <div class="equation-box">
+      $$\text{Rotor limit: } P^2 + \left(Q + \frac{V_t^2}{X_s}\right)^2 = \left(\frac{E_f V_t}{X_s}\right)^2$$
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. SWING EQUATION ═══════════ -->
+  <section id="swing-equation">
+    <h2>Swing Equation</h2>
+    <p>
+      The equation of motion governing the rotor angle:
+    </p>
+    <div class="equation-box">
+      $$\frac{2H}{\omega_s}\frac{d^2\delta}{dt^2} = P_m - P_e = P_m - \frac{E_f V_t}{X_s}\sin\delta$$
+    </div>
+    <p>
+      where $H$ is the inertia constant (MJ/MVA), $\omega_s$ is synchronous
+      speed (rad/s), $P_m$ is mechanical power, and $P_e$ is electrical power.
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Normalised Form</h4>
+          <p>Defining the per-unit inertia coefficient $M = 2H / \omega_s$:</p>
+          $$M \ddot{\delta} = P_m - P_e$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Including Damping</h4>
+          $$M \ddot{\delta} + D \dot{\delta} = P_m - P_e$$
+          <p>where $D$ is the damping coefficient (pu power $\times$ s/rad).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. EQUAL-AREA CRITERION ═══════════ -->
+  <section id="equal-area">
+    <h2>Equal-Area Criterion</h2>
+    <p>
+      A graphical/analytical method for assessing first-swing stability of a
+      single machine connected to an infinite bus.
+    </p>
+
+    <div class="derivation-steps">
+      <div class="derivation-step">
+        <span class="step-number">1</span>
+        <div class="step-content">
+          <h4>Energy Balance</h4>
+          <p>
+            Multiply the swing equation by $\dot{\delta}$ and integrate:
+          </p>
+          $$\frac{M}{2}\dot{\delta}^2 = \int_{\delta_0}^{\delta} (P_m - P_e)\, d\delta$$
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">2</span>
+        <div class="step-content">
+          <h4>Stability Condition</h4>
+          <p>
+            The machine returns to synchronism if $\dot{\delta}$ returns to zero,
+            i.e., the accelerating area equals the available decelerating area:
+          </p>
+          <div class="equation-box">
+            $$A_{acc} = \int_{\delta_0}^{\delta_{cl}} (P_m - P_{e,fault})\, d\delta
+              \leq \int_{\delta_{cl}}^{\delta_{max}} (P_{e,post} - P_m)\, d\delta = A_{dec}$$
+          </div>
+        </div>
+      </div>
+      <div class="derivation-step">
+        <span class="step-number">3</span>
+        <div class="step-content">
+          <h4>Critical Clearing Angle</h4>
+          <p>
+            The maximum clearing angle $\delta_{cr}$ that maintains stability
+            corresponds to $A_{acc} = A_{dec}$.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 1 — PHASOR DIAGRAM ═══════════ -->
+  <section id="sim-phasor" class="sim-section">
+    <h2>Simulation — Phasor Diagram</h2>
+    <p>
+      Explore the synchronous machine phasor diagram interactively. Adjust
+      terminal voltage, synchronous reactance, and power angle. Toggle between
+      generator and motor mode to see how the phasor relationships change.
+      The $R_a I_a$ and $jX_s I_a$ voltage drops are shown as dashed components.
+    </p>
+    <div class="sim-container" id="phasor-diagram-sim">
+      <div class="sim-header">
+        <h3>Synchronous Machine Phasor Diagram</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 2 — POWER-ANGLE CURVE ═══════════ -->
+  <section id="sim-power-angle" class="sim-section">
+    <h2>Simulation — Power-Angle Curve &amp; Equal-Area Criterion</h2>
+    <p>
+      Visualise the classic $P$-$\delta$ curve. Adjust excitation and load to
+      see the stable and unstable equilibrium points. Enable the
+      <strong>Equal-Area Criterion</strong> overlay to study first-swing
+      transient stability — red area is accelerating energy, green area is
+      decelerating energy. If green ≥ red, the system is stable.
+    </p>
+    <div class="sim-container" id="power-angle-sim">
+      <div class="sim-header">
+        <h3>Power-Angle Curve</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ SIM 3 — SALIENT-POLE ═══════════ -->
+  <section id="sim-salient" class="sim-section">
+    <h2>Simulation — Salient-Pole Power Characteristics</h2>
+    <p>
+      Compare the excitation torque and reluctance torque components for a
+      salient-pole machine. Adjust $X_d$ and $X_q$ to see how saliency
+      affects the total power curve and shifts the maximum power angle below
+      90°.
+    </p>
+    <div class="sim-container" id="salient-pole-sim">
+      <div class="sim-header">
+        <h3>Salient-Pole Two-Reaction Power</h3>
+        <span class="sim-badge">Interactive</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ QUICK REFERENCE ═══════════ -->
+  <section id="quick-ref">
+    <h2>Quick Reference</h2>
+    <div class="ref-grid">
+      <div class="ref-card">
+        <h4>EMF Equation</h4>
+        <p class="math-highlight">$E_f = V_t + jX_s I_a$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Power (Round Rotor)</h4>
+        <p class="math-highlight">$P = \dfrac{E_f V_t}{X_s}\sin\delta$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Reactive Power</h4>
+        <p class="math-highlight">$Q = \dfrac{V_t(E_f\cos\delta - V_t)}{X_s}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Salient-Pole Power</h4>
+        <p class="math-highlight">$P = \dfrac{E_f V_t}{X_d}\sin\delta + \dfrac{V_t^2}{2}\left(\dfrac{1}{X_q}-\dfrac{1}{X_d}\right)\sin 2\delta$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Swing Equation</h4>
+        <p class="math-highlight">$M\ddot{\delta} = P_m - P_e$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Inertia Constant</h4>
+        <p class="math-highlight">$H = \dfrac{\frac{1}{2}J\omega_m^2}{S_{rated}}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>Equal-Area Stability</h4>
+        <p class="math-highlight">$A_{acc} \leq A_{dec}$</p>
+      </div>
+      <div class="ref-card">
+        <h4>d-q Currents</h4>
+        <p class="math-highlight">$I_d = \dfrac{E_f - V_t\cos\delta}{X_d}$</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════ SCRIPTS ═══════════ -->
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/nav.js"></script>
+<script src="../../assets/js/simulations.js"></script>
+<script src="sim/phasor-diagram.js"></script>
+<script src="sim/power-angle.js"></script>
+<script src="sim/salient-pole.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  PhasorDiagramSim.create('phasor-diagram-sim');
+  PowerAngleSim.create('power-angle-sim');
+  SalientPoleSim.create('salient-pole-sim');
+
+  /* Hero — spinning rotor animation */
+  var hc = document.getElementById('ch3-hero-canvas');
+  if (hc) {
+    var hctx = PET.setupCanvas(hc, 900, 220);
+    var t = 0;
+    function drawHero() {
+      hctx.clearRect(0, 0, 900, 220);
+      PET.drawGrid(hctx, 900, 220, 30, 'rgba(38,48,70,0.18)');
+
+      var cx = 450, cy = 110, R = 70;
+
+      /* stator circle */
+      hctx.strokeStyle = 'rgba(64,196,255,0.3)'; hctx.lineWidth = 3;
+      hctx.beginPath(); hctx.arc(cx, cy, R, 0, 2 * Math.PI); hctx.stroke();
+
+      /* rotor spinning */
+      var angle = t * 0.03;
+      for (var p = 0; p < 4; p++) {
+        var a = angle + p * Math.PI / 2;
+        var x1 = cx + 25 * Math.cos(a), y1 = cy + 25 * Math.sin(a);
+        var x2 = cx + 55 * Math.cos(a), y2 = cy + 55 * Math.sin(a);
+        hctx.strokeStyle = p % 2 === 0 ? '#ffca28' : '#ff5252';
+        hctx.lineWidth = 8;
+        hctx.beginPath(); hctx.moveTo(x1, y1); hctx.lineTo(x2, y2); hctx.stroke();
+      }
+
+      /* rotor centre */
+      hctx.fillStyle = '#eceff1';
+      hctx.beginPath(); hctx.arc(cx, cy, 6, 0, 2 * Math.PI); hctx.fill();
+
+      /* phasors coming out radially */
+      for (var ph = 0; ph < 3; ph++) {
+        var pa = ph * 2 * Math.PI / 3 + t * 0.02;
+        var mag = 80 + 15 * Math.sin(t * 0.05 + ph);
+        var colors = ['#00e676', '#40c4ff', '#ffca28'];
+        PET.drawPhasor(hctx, cx, cy,
+          cx + mag * Math.cos(pa), cy + mag * Math.sin(pa),
+          colors[ph], 2);
+      }
+
+      t++;
+      requestAnimationFrame(drawHero);
+    }
+    drawHero();
+  }
+
+  /* KaTeX auto-render */
+  if (typeof renderMathInElement === 'function') {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false }
+      ]
+    });
+  }
+});
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+</body>
+</html>
