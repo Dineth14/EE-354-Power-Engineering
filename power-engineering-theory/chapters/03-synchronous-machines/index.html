@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 <link rel="stylesheet" href="../../assets/css/main.css">
 <link rel="stylesheet" href="../../assets/css/math.css">
 </head>
@@ -480,9 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var pa = ph * 2 * Math.PI / 3 + t * 0.02;
         var mag = 80 + 15 * Math.sin(t * 0.05 + ph);
         var colors = ['#00e676', '#40c4ff', '#ffca28'];
-        PET.drawPhasor(hctx, cx, cy,
-          cx + mag * Math.cos(pa), cy + mag * Math.sin(pa),
-          colors[ph], 2);
+        PET.drawPhasor(hctx, cx, cy, mag, pa, colors[ph], '');
       }
 
       t++;

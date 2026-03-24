@@ -110,13 +110,13 @@ var PhasorDiagramSim = (function () {
       ctx.fillText('Im', ox + 5, 35);
 
       // Vt phasor (along real axis)
-      PET.drawPhasor(ctx, ox, oy, ox + VtVec.x * scale, oy, PET.colors.green, 3, 'V_t');
+      PET.drawPhasor(ctx, ox, oy, Vt, 0, PET.colors.green, 'V_t', scale);
 
       // Ef phasor
-      PET.drawPhasor(ctx, ox, oy, ox + efx * scale, oy - efy * scale, PET.colors.amber, 3, 'E_f');
+      PET.drawPhasor(ctx, ox, oy, EfMag, sign * dRad, PET.colors.amber, 'E_f', scale);
 
       // Ia phasor
-      PET.drawPhasor(ctx, ox, oy, ox + Ia_x * scale, oy - Ia_y * scale, PET.colors.blue, 2.5, 'I_a');
+      PET.drawPhasor(ctx, ox, oy, Ia_mag, phi, PET.colors.blue, 'I_a', scale);
 
       // jXs*Ia drop (from Vt tip to Ef tip)
       var jXsIa_r = -Xs * Ia_y; // j*Xs * (Ia_x + jIa_y) = -Xs*Ia_y + jXs*Ia_x
