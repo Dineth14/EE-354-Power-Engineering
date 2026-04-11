@@ -23,6 +23,23 @@
       });
     }
 
+    /* ---------- Menu close button (Ch2-4) ---------- */
+    var closeBtn = document.querySelector('.menu-close');
+    if (closeBtn && sidebar) {
+      closeBtn.addEventListener('click', function () {
+        sidebar.classList.remove('open');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    /* ---------- Nav section toggle (Ch2-4) ---------- */
+    var sectionToggles = document.querySelectorAll('.nav-section-toggle');
+    sectionToggles.forEach(function (btn) {
+      var content = btn.parentElement.querySelector('.nav-section-content');
+      if (content) content.style.display = '';
+      btn.setAttribute('aria-expanded', 'true');
+    });
+
     /* ---------- Active nav link ---------- */
     var navLinks = document.querySelectorAll('.sidebar-nav a');
     var currentPath = window.location.pathname;
@@ -53,7 +70,7 @@
     });
 
     /* ---------- Floating TOC highlight on scroll ---------- */
-    var tocLinks = document.querySelectorAll('.toc-aside a');
+    var tocLinks = document.querySelectorAll('.toc-aside a, nav.toc ol li a');
     if (tocLinks.length > 0) {
       var headings = [];
       tocLinks.forEach(function (a) {

@@ -296,6 +296,9 @@ pre code {
   cursor: pointer;
   position: relative;
   transition: background var(--transition-fast);
+  font-size: 0;
+  color: transparent;
+  overflow: hidden;
 }
 
 .theme-toggle::after {
@@ -1077,4 +1080,249 @@ select:focus {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ============================================================
+   Chapters 2-4 Layout Compatibility
+   These chapters use different class names / HTML structure.
+   ============================================================ */
+
+/* --- .content = .main-content equivalent --- */
+main.content {
+  margin-left: var(--sidebar-width);
+  min-width: 0;
+  max-width: 900px;
+  padding: 0 2.5rem 2rem;
+}
+
+/* --- .topbar = .top-bar equivalent --- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  background: rgba(11, 15, 26, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 2rem;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: var(--sidebar-width);
+}
+
+[data-theme="light"] .topbar {
+  background: rgba(245, 247, 250, 0.85);
+}
+
+.topbar .breadcrumb {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.topbar .breadcrumb strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* --- Hero text overlay for Ch2-4 --- */
+.chapter-hero-text {
+  position: relative;
+  z-index: 2;
+}
+
+.chapter-label {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0,230,118,0.15);
+  color: var(--accent-green);
+  margin-bottom: 0.5rem;
+}
+
+.chapter-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* --- TOC (nav.toc) in Ch2-4 = .toc-aside --- */
+nav.toc {
+  position: fixed;
+  right: 1.5rem;
+  top: calc(var(--header-height) + 2rem);
+  width: var(--toc-width);
+  max-height: calc(100vh - var(--header-height) - 4rem);
+  overflow-y: auto;
+  font-size: 0.78rem;
+  z-index: 800;
+}
+
+nav.toc h3 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+  margin-top: 0;
+}
+
+nav.toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+nav.toc ol li {
+  margin: 0;
+}
+
+nav.toc ol li a {
+  display: block;
+  padding: 0.3rem 0;
+  padding-left: 0.8rem;
+  color: var(--text-muted);
+  border-left: 2px solid var(--border-color);
+  transition: all var(--transition-fast);
+  line-height: 1.4;
+}
+
+nav.toc ol li a:hover {
+  color: var(--accent-green);
+  border-left-color: var(--accent-green);
+}
+
+/* --- Sidebar nav-link styling for Ch2-4 --- */
+.sidebar-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1.2rem;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.sidebar-nav .nav-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border-left-color: var(--accent-blue);
+}
+
+.sidebar-nav .nav-link.active {
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.05);
+  border-left-color: var(--accent-green);
+  font-weight: 500;
+}
+
+/* --- Menu close button (Ch2-4 sidebar) --- */
+.menu-close {
+  display: none;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* --- Nav section toggle (Ch2-4 sidebar) --- */
+.nav-section-toggle {
+  background: none;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+
+.nav-section-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Logo as link (Ch2-4 sidebar) --- */
+.sidebar-header a.logo {
+  width: auto;
+  height: auto;
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--bg-primary);
+  text-decoration: none;
+}
+
+/* --- Derivation steps (Ch2-4) --- */
+.derivation-steps {
+  margin: 1rem 0;
+}
+
+.derivation-step {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.step-content {
+  flex: 1;
+}
+
+/* --- Responsive overrides for Ch2-4 --- */
+@media (max-width: 1280px) {
+  nav.toc { display: none; }
+}
+
+@media (max-width: 960px) {
+  main.content {
+    margin-left: 0;
+    padding: 1.5rem 1rem;
+  }
+
+  .topbar {
+    margin-left: 0;
+  }
+
+  .menu-close {
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  main.content {
+    padding: 1rem 0.75rem;
+  }
+}
+
+@media print {
+  .topbar, nav.toc, .menu-close { display: none; }
+  main.content { margin-left: 0; }
 }
